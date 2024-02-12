@@ -9,7 +9,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import SettingsIcon from '@mui/icons-material/Settings';
 import {CircularProgress} from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
-import FacebookLogin from 'react-facebook-login';
+import FacebookLogin from '@greatsumini/react-facebook-login';
 
 function App() {
   const [apiKey, setApiKey] = useState('');
