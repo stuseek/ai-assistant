@@ -8,6 +8,7 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
+import TermsConditions from "./TermsConditions";
 
 function App() {
   return (
@@ -23,6 +24,9 @@ function App() {
           <Button color="inherit" component={Link} to="/privacy-policy" sx={{marginRight: 2}}>
             Privacy Policy
           </Button>
+          <Button color="inherit" component={Link} to="/terms-conditions" sx={{marginRight: 2}}>
+            Terms & Conditions
+          </Button>
         </Toolbar>
       </AppBar>
 
@@ -31,6 +35,7 @@ function App() {
         <Routes>
           <Route path="/privacy-policy" element={<PrivacyPolicy/>}/>
           <Route path="/chatbot" element={<ChatBot/>}/>
+          <Route path="/terms-conditions" element={<TermsConditions/>}/>
           <Route path="/" element={<Home/>}/>
         </Routes>
       </Container>

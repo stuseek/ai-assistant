@@ -129,8 +129,6 @@ function ChatBot() {
             autoLoad={false}
             fields="name,email,picture"
             callback={responseFacebook}
-            cssClass="facebook-button-class"
-            icon="fa-facebook"
             textButton="Login with Facebook"
           />
         ) : (
