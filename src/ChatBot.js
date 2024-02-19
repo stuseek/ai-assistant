@@ -130,6 +130,9 @@ function ChatBot() {
             fields="name,email,picture"
             callback={responseFacebook}
             textButton="Login with Facebook"
+            initParams={{
+              version: 'v19.0'
+            }}
           />
         ) : (
           <>
