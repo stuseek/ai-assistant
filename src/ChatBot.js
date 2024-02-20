@@ -38,6 +38,12 @@ function ChatBot() {
     }, {scope: 'email,public_profile', ignoreSdkError: true});
   };
 
+  const checkLoginStatus = () => {
+    window.FB.getLoginStatus(function(response) {
+      console.log(response)
+    });
+  }
+
   useEffect(() => {
     window.FB.getLoginStatus(function(response) {
       if (response.status === 'connected') {
@@ -145,7 +151,10 @@ function ChatBot() {
     <Container maxWidth="sm">
       <Box sx={{my: 4}}>
         {!isAuthenticated ? (
-          <button onClick={handleFacebookLogin}>Login with Facebook</button>
+          <>
+            <button onClick={handleFacebookLogin}>Login with Facebook</button>
+            <button onClick={checkLoginStatus}>Check Login Status</button>
+          </>
         ) : (
           <>
             <AppBar position="static">
