@@ -40,10 +40,13 @@ function ChatBot() {
   useEffect(() => {
     window.FB.getLoginStatus(function(response) {
       if (response.status === 'connected') {
+        alert(2)
         setIsAuthenticated(true);
       } else if (response.status === 'not_authorized') {
+        alert(3)
         setIsAuthenticated(false);
       } else {
+        alert(4)
         setIsAuthenticated(false);
       }
     });
