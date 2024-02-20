@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import ReactMarkdown from 'react-markdown';
 import {
   Container, TextField, Button, Box, List, ListItem, ListItemText, Paper,
@@ -36,6 +36,18 @@ function ChatBot() {
       }
     }, {scope: 'email', ignoreSdkError: true});
   };
+
+  useEffect(() => {
+    window.FB.getLoginStatus(function(response) {
+      if (response.status === 'connected') {
+        setIsAuthenticated(true);
+      } else if (response.status === 'not_authorized') {
+        setIsAuthenticated(false);
+      } else {
+        setIsAuthenticated(false);
+      }
+    });
+  }, []);
 
 
   const toggleDrawer = () => {
