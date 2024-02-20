@@ -24,6 +24,7 @@ function ChatBot() {
 
   const handleFacebookLogin = () => {
     window.FB.login((response) => {
+      console.log('Response:', response);
       if (response.authResponse) {
         console.log('Welcome! Fetching your information.... ');
         window.FB.api('/me', function(response) {
@@ -39,15 +40,11 @@ function ChatBot() {
 
   useEffect(() => {
     window.FB.getLoginStatus(function(response) {
-      debugger;
       if (response.status === 'connected') {
-        alert(2)
         setIsAuthenticated(true);
       } else if (response.status === 'not_authorized') {
-        alert(3)
         setIsAuthenticated(false);
       } else {
-        alert(4)
         setIsAuthenticated(false);
       }
     });
