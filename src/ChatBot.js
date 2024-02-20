@@ -35,7 +35,7 @@ function ChatBot() {
         console.log('User cancelled login or did not fully authorize.');
         setIsAuthenticated(false);
       }
-    }, {scope: 'email', ignoreSdkError: true});
+    }, {scope: 'email, public_profile', ignoreSdkError: true});
   };
 
   useEffect(() => {
