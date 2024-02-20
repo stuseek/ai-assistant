@@ -23,14 +23,21 @@ function ChatBot() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
 
-  const responseFacebook = (response) => {
-    if (response.accessToken) {
-      setIsAuthenticated(true);
-      // Further actions can be taken here, such as storing the user data or token for future use.
-    } else {
-      setIsAuthenticated(false);
-      // Handle login failure
-    }
+  const handleFacebookLogin = () => {
+    window.FB.login((response) => {
+      if (response.authResponse) {
+        console.log('Welcome! Fetching your information.... ');
+        // Fetch user information if needed
+        window.FB.api('/me', function(response) {
+          console.log('Good to see you, ' + response.name + '.');
+        });
+        setIsAuthenticated(true);
+        // You can also get the token using response.authResponse.accessToken
+      } else {
+        console.log('User cancelled login or did not fully authorize.');
+        setIsAuthenticated(false);
+      }
+    }, {scope: 'email,public_profile'}); // Define the permissions your app requires
   };
 
 
@@ -124,16 +131,7 @@ function ChatBot() {
     <Container maxWidth="sm">
       <Box sx={{my: 4}}>
         {!isAuthenticated ? (
-          <FacebookLogin
-            appId={process.env.REACT_APP_APP_ID}
-            autoLoad={false}
-            fields="name,email,picture"
-            callback={responseFacebook}
-            textButton="Login with Facebook"
-            initParams={{
-              version: 'v19.0'
-            }}
-          />
+          <button onClick={handleFacebookLogin}>Login with Facebook</button>
         ) : (
           <>
             <AppBar position="static">
