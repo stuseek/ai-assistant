@@ -35,17 +35,21 @@ function ChatBot() {
         console.log('User cancelled login or did not fully authorize.');
         setIsAuthenticated(false);
       }
-    }, {scope: 'email, public_profile', ignoreSdkError: true});
+    }, {scope: 'email,public_profile', ignoreSdkError: true});
   };
 
   useEffect(() => {
     window.FB.getLoginStatus(function(response) {
       if (response.status === 'connected') {
         setIsAuthenticated(true);
+        console.log(1)
       } else if (response.status === 'not_authorized') {
         setIsAuthenticated(false);
+        console.log(2)
       } else {
         setIsAuthenticated(false);
+        console.log(3)
+
       }
     });
   }, []);
