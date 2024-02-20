@@ -39,6 +39,7 @@ function ChatBot() {
 
   useEffect(() => {
     window.FB.getLoginStatus(function(response) {
+      debugger;
       if (response.status === 'connected') {
         alert(2)
         setIsAuthenticated(true);
