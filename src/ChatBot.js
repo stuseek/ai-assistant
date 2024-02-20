@@ -9,7 +9,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 import SettingsIcon from '@mui/icons-material/Settings';
 import {CircularProgress} from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
-import FacebookLogin from '@greatsumini/react-facebook-login';
 
 function ChatBot() {
   const [apiKey, setApiKey] = useState('');
@@ -27,17 +26,15 @@ function ChatBot() {
     window.FB.login((response) => {
       if (response.authResponse) {
         console.log('Welcome! Fetching your information.... ');
-        // Fetch user information if needed
         window.FB.api('/me', function(response) {
           console.log('Good to see you, ' + response.name + '.');
         });
         setIsAuthenticated(true);
-        // You can also get the token using response.authResponse.accessToken
       } else {
         console.log('User cancelled login or did not fully authorize.');
         setIsAuthenticated(false);
       }
-    }, {scope: 'email,public_profile'}); // Define the permissions your app requires
+    }, {scope: 'email'});
   };
 
 
