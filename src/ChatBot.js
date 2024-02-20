@@ -34,7 +34,7 @@ function ChatBot() {
         console.log('User cancelled login or did not fully authorize.');
         setIsAuthenticated(false);
       }
-    }, {scope: 'email'});
+    }, {scope: 'email', ignoreSdkError: true});
   };
 
 
