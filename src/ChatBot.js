@@ -35,7 +35,7 @@ function ChatBot() {
         console.log('User cancelled login or did not fully authorize.');
         setIsAuthenticated(false);
       }
-    }, {scope: 'email,public_profile', ignoreSdkError: true});
+    }, {initParams: {configId: "1121020542257714"}, ignoreSdkError: true});
   };
 
   const checkLoginStatus = () => {
@@ -48,13 +48,13 @@ function ChatBot() {
     window.FB.getLoginStatus(function(response) {
       if (response.status === 'connected') {
         setIsAuthenticated(true);
-        console.log(1)
+        console.log('User is authorized')
       } else if (response.status === 'not_authorized') {
         setIsAuthenticated(false);
-        console.log(2)
+        console.log('User is not authorized')
       } else {
         setIsAuthenticated(false);
-        console.log(3)
+        console.log('User auth status is unknown')
 
       }
     });
