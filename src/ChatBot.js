@@ -21,23 +21,6 @@ function ChatBot() {
   const [conversationHistory, setConversationHistory] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-
-  const handleFacebookLogin = () => {
-    window.FB.login((response) => {
-      console.log('Response:', response);
-      if (response.authResponse) {
-        console.log('Welcome! Fetching your information.... ');
-        window.FB.api('/me', function(response) {
-          console.log('Good to see you, ' + response.name + '.');
-        });
-        setIsAuthenticated(true);
-      } else {
-        console.log('User cancelled login or did not fully authorize.');
-        setIsAuthenticated(false);
-      }
-    }, {initParams: {configId: "1121020542257714"}, ignoreSdkError: true});
-  };
-
   const checkLoginStatus = () => {
     window.FB.getLoginStatus(function(response) {
       console.log(response)
@@ -152,7 +135,6 @@ function ChatBot() {
       <Box sx={{my: 4}}>
         {!isAuthenticated ? (
           <>
-            <button onClick={handleFacebookLogin}>Login with Facebook</button>
             <button onClick={checkLoginStatus}>Check Login Status</button>
           </>
         ) : (
