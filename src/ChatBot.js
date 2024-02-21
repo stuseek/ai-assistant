@@ -20,17 +20,19 @@ function ChatBot() {
   const [isLoading, setIsLoading] = useState(false);
   const [conversationHistory, setConversationHistory] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authToken, setAuthToken] = useState(false);
 
   const checkLoginStatus = () => {
-    window.FB.getLoginStatus(function(response) {
+    window.FB.getLoginStatus(function (response) {
       console.log(response)
     });
   }
 
   useEffect(() => {
-    window.FB.getLoginStatus(function(response) {
+    window.FB.getLoginStatus(function (response) {
       if (response.status === 'connected') {
         setIsAuthenticated(true);
+        setAuthToken(response.authResponse.accessToken);
         console.log('User is authorized')
       } else if (response.status === 'not_authorized') {
         setIsAuthenticated(false);
@@ -42,7 +44,6 @@ function ChatBot() {
       }
     });
   }, []);
-
 
   const toggleDrawer = () => {
     setDrawerOpen(!isDrawerOpen);
@@ -126,8 +127,38 @@ function ChatBot() {
     }
   };
 
+  const fetchCampaigns = async () => {
+    const accessToken = authToken;
+    const adAccountId = '1785133881702528';
+    const baseUrl = `https://graph.facebook.com/v19.0/act_${adAccountId}/campaigns`;
+    const fields = 'id,name,status,effective_status';
+    const url = `${baseUrl}?fields=${fields}&access_token=${accessToken}`;
+
+    setIsLoading(true); // Use the existing isLoading state to show loading indicator
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      setIsLoading(false); // Hide loading indicator
+      const campaignInfo = data.data.map(campaign => `${campaign.name} - Status: ${campaign.status}`).join('\n');
+      setChat([...chat, {type: 'received', text: `Campaigns:\n${campaignInfo}`}]);
+    } catch (error) {
+      console.error("Error fetching campaigns:", error);
+      setIsLoading(false); // Hide loading indicator
+      setChat([...chat, {type: 'error', text: 'Error fetching campaign information'}]);
+    }
+  };
+
   const handleSendClick = () => {
-    sendMessageToOpenAI();
+    if (question.toLowerCase().includes("fetch my campaigns")) {
+      fetchCampaigns(); // Directly fetch campaigns if this specific question is asked
+    } else {
+      sendMessageToOpenAI(); // Otherwise, proceed with sending the question to OpenAI
+    }
+    setQuestion(''); // Clear the question input field
   };
 
   return (
