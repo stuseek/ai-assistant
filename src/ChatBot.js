@@ -120,9 +120,8 @@ function ChatBot() {
 
   const fetchCampaigns = async () => {
     const accessToken = authToken;
-    const adAccountId = '775557407256149';
+    const adAccountId = '1785133881702528';
     const baseUrl = `https://graph.facebook.com/v19.0/act_${adAccountId}/campaigns`;
-    const fields = 'id,name,status,effective_status';
     const url = `${baseUrl}?fields=${fields}&access_token=${accessToken}`;
 
     setIsLoading(true); // Use the existing isLoading state to show loading indicator
