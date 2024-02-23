@@ -207,7 +207,7 @@ function ChatBot() {
   return (
     <Container maxWidth="sm">
       <Box sx={{my: 4}}>
-        {isAuthenticated ? (
+        {!isAuthenticated ? (
           <>
             <button onClick={checkLoginStatus}>Check Login Status</button>
           </>
