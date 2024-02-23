@@ -133,8 +133,6 @@ function ChatBot() {
       }
       const data = await response.json();
       setIsLoading(false); // Hide loading indicator
-      const campaignInfo = data.data.map(campaign => `${campaign.name} - Status: ${campaign.status}`).join('\n');
-      setChat([...chat, {type: 'received', text: `Campaigns:\n${campaignInfo}`}]);
       return JSON.stringify(data.data);
     } catch (error) {
       console.error("Error fetching campaigns:", error);
@@ -198,7 +196,7 @@ function ChatBot() {
 
   const handleSendClick = async () => {
     const suggestedFields = await sendMessageToOpenAI();
-    alert(suggestedFields);
+    // alert(suggestedFields);
     const campaignInfo = await fetchCampaigns(suggestedFields);
     await interpretateResults(campaignInfo);
     setQuestion('');
