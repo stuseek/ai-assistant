@@ -141,6 +141,12 @@ function ChatBot() {
     }
   };
 
+  const addMessageToHistory = (message, type = 'sent') => {
+    const newMessage = { text: message, type };
+
+    setConversationHistory(prevHistory => [...prevHistory, newMessage]);
+  };
+
   const interpretateResults = async (campaignData = '') => {
     if (!campaignData.trim()) return;
 
@@ -197,6 +203,7 @@ function ChatBot() {
   const handleSendClick = async () => {
     const suggestedFields = await sendMessageToOpenAI();
     // alert(suggestedFields);
+    addMessageToHistory(question, 'sent'); // Add the user's question to history
     const campaignInfo = await fetchCampaigns(suggestedFields);
     await interpretateResults(campaignInfo);
     setQuestion('');
