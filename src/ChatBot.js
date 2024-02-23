@@ -21,6 +21,7 @@ function ChatBot() {
   const [conversationHistory, setConversationHistory] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authToken, setAuthToken] = useState(false);
+  const [fields, setFields] = useState('');
 
   const checkLoginStatus = () => {
     window.FB.getLoginStatus(function (response) {
@@ -70,19 +71,17 @@ function ChatBot() {
 
     setIsLoading(true);
 
-    const newMessage = {role: "user", content: question};
-    const updatedConversationHistory = [...conversationHistory, newMessage];
+    const openAIQuestion = `Based on the customer request: "${question}", what fields should we fetch from the Facebook Ads API? Response as field1,field2,field3`;
 
     const messagesPayload = [
       {
         "role": "system",
-        "content": "You are a helpful assistant. Please act as mate. Answer about marketing data provided. Ignore non-related questions."
+        "content": "You are a helpful assistant. Analyze the customer request and suggest the fields needed for a Facebook Ads API request."
       },
       {
-        "role": "system",
-        "content": additionalInfo || "There should have been data there, but data provided. Please say it to user. "
-      },
-      ...updatedConversationHistory
+        "role": "user",
+        "content": openAIQuestion
+      }
     ];
 
     const data = {
@@ -107,23 +106,15 @@ function ChatBot() {
       const responseData = await response.json();
       const botResponseContent = responseData.choices[0].message.content;
 
-      // Add the bot's response to the conversation history
-      const botResponse = {role: "assistant", content: botResponseContent};
-      updatedConversationHistory.push(botResponse);
+      const suggestedFields = botResponseContent; // Here you might need to parse the response if it's not in the desired format
 
-      // Update the conversation history state
-      setConversationHistory(updatedConversationHistory);
-
-      // Update the chat for rendering
-      const newChatEntry = {type: 'sent', text: question};
-      const botChatResponse = {type: 'received', text: botResponseContent};
-      setChat([...chat, newChatEntry, botChatResponse]);
-      setQuestion('');
+      console.log("Suggested Fields:", suggestedFields);
+      setFields(suggestedFields);
 
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
-      setChat([...chat, {type: 'error', text: 'Error communicating with OpenAI. Please try again later'}]);
+      console.error('Error communicating with OpenAI:', error);
     }
   };
 
@@ -152,13 +143,16 @@ function ChatBot() {
     }
   };
 
-  const handleSendClick = () => {
-    if (question.toLowerCase().includes("fetch my campaigns")) {
-      fetchCampaigns(); // Directly fetch campaigns if this specific question is asked
-    } else {
-      sendMessageToOpenAI(); // Otherwise, proceed with sending the question to OpenAI
-    }
-    setQuestion(''); // Clear the question input field
+  const handleSendClick = async () => {
+    // if (question.toLowerCase().includes("fetch my campaigns")) {
+    //   fetchCampaigns();
+    // } else {
+    //   sendMessageToOpenAI();
+    // }
+
+    await sendMessageToOpenAI();
+    await fetchCampaigns();
+    setQuestion('');
   };
 
   return (
