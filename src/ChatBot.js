@@ -71,7 +71,7 @@ function ChatBot() {
 
     setIsLoading(true);
 
-    const openAIQuestion = `Based on the customer request: "${question}", what fields should we fetch from the Facebook Ads API? Response as field1,field2,field3,insights.fields(field1, field2, field3)`;
+    const openAIQuestion = `Based on the customer request: "${question}", what fields should we fetch from the Facebook Ads API? Response as field1,field2,field3,insights.fields(field1,field2,field3)`;
 
     const messagesPayload = [
       {
@@ -108,10 +108,10 @@ function ChatBot() {
 
       const suggestedFields = botResponseContent; // Here you might need to parse the response if it's not in the desired format
 
-      setCampaignFields(suggestedFields);
       console.log("Suggested Fields:", campaignFields);
 
       setIsLoading(false);
+      return suggestedFields;
     } catch (error) {
       setIsLoading(false);
       console.error('Error communicating with OpenAI:', error);
@@ -135,6 +135,7 @@ function ChatBot() {
       setIsLoading(false); // Hide loading indicator
       const campaignInfo = data.data.map(campaign => `${campaign.name} - Status: ${campaign.status}`).join('\n');
       setChat([...chat, {type: 'received', text: `Campaigns:\n${campaignInfo}`}]);
+      return campaignInfo;
     } catch (error) {
       console.error("Error fetching campaigns:", error);
       setIsLoading(false); // Hide loading indicator
@@ -142,15 +143,64 @@ function ChatBot() {
     }
   };
 
-  const handleSendClick = async () => {
-    // if (question.toLowerCase().includes("fetch my campaigns")) {
-    //   fetchCampaigns();
-    // } else {
-    //   sendMessageToOpenAI();
-    // }
+  const interpretateResults = async (campaignData = '') => {
+    if (!campaignData.trim()) return;
 
-    await sendMessageToOpenAI();
-    await fetchCampaigns();
+    setIsLoading(true);
+
+    // Assuming `campaignData` is a string representation of the fetched campaigns
+    // Adjust the question to fit your needs for analysis
+    const analysisQuestion = `Based on the following campaign data: "${campaignData}", and considering the user's initial question: "${question}", how can we interpret this information?`;
+
+    const messagesPayload = [
+      {
+        "role": "system",
+        "content": "You are a helpful assistant. Analyze the provided campaign data in the context of the user's initial question and provide insights."
+      },
+      {
+        "role": "user",
+        "content": analysisQuestion
+      }
+    ];
+
+    const data = {
+      model: "gpt-4",
+      messages: messagesPayload,
+    };
+
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+
+      const responseData = await response.json();
+      const botResponseContent = responseData.choices[0].message.content;
+
+      // Process the response here, e.g., displaying it in the chat
+      setChat([...chat, {type: 'received', text: `Insights: ${botResponseContent}`}]);
+
+      setIsLoading(false);
+    } catch (error) {
+      setIsLoading(false);
+      console.error('Error communicating with OpenAI for result interpretation:', error);
+      setChat([...chat, {type: 'error', text: 'Error interpreting campaign information'}]);
+    }
+  };
+
+  const handleSendClick = async () => {
+    const suggestedFields = await sendMessageToOpenAI();
+    setCampaignFields(suggestedFields);
+    const campaignInfo = await fetchCampaigns();
+    await interpretateResults(campaignInfo);
     setQuestion('');
   };
 
