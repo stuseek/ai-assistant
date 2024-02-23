@@ -118,11 +118,11 @@ function ChatBot() {
     }
   };
 
-  const fetchCampaigns = async () => {
+  const fetchCampaigns = async (suggestedFields) => {
     const accessToken = authToken;
     const adAccountId = '1785133881702528';
     const baseUrl = `https://graph.facebook.com/v19.0/act_${adAccountId}/campaigns`;
-    const url = `${baseUrl}?fields=${campaignFields}&access_token=${accessToken}`;
+    const url = `${baseUrl}?fields=${suggestedFields}&access_token=${accessToken}`;
 
     setIsLoading(true); // Use the existing isLoading state to show loading indicator
 
@@ -198,8 +198,7 @@ function ChatBot() {
 
   const handleSendClick = async () => {
     const suggestedFields = await sendMessageToOpenAI();
-    setCampaignFields(suggestedFields);
-    const campaignInfo = await fetchCampaigns();
+    const campaignInfo = await fetchCampaigns(suggestedFields);
     await interpretateResults(campaignInfo);
     setQuestion('');
   };
