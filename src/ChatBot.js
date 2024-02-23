@@ -135,7 +135,7 @@ function ChatBot() {
       setIsLoading(false); // Hide loading indicator
       const campaignInfo = data.data.map(campaign => `${campaign.name} - Status: ${campaign.status}`).join('\n');
       setChat([...chat, {type: 'received', text: `Campaigns:\n${campaignInfo}`}]);
-      return campaignInfo;
+      return data.data;
     } catch (error) {
       console.error("Error fetching campaigns:", error);
       setIsLoading(false); // Hide loading indicator
