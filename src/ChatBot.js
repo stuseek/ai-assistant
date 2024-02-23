@@ -21,7 +21,7 @@ function ChatBot() {
   const [conversationHistory, setConversationHistory] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authToken, setAuthToken] = useState(false);
-  const [fields, setFields] = useState('');
+  const [campaignFields, setCampaignFields] = useState('');
 
   const checkLoginStatus = () => {
     window.FB.getLoginStatus(function (response) {
@@ -109,7 +109,7 @@ function ChatBot() {
       const suggestedFields = botResponseContent; // Here you might need to parse the response if it's not in the desired format
 
       console.log("Suggested Fields:", suggestedFields);
-      setFields(suggestedFields);
+      setCampaignFields(suggestedFields);
 
       setIsLoading(false);
     } catch (error) {
@@ -122,7 +122,7 @@ function ChatBot() {
     const accessToken = authToken;
     const adAccountId = '1785133881702528';
     const baseUrl = `https://graph.facebook.com/v19.0/act_${adAccountId}/campaigns`;
-    const url = `${baseUrl}?fields=${fields}&access_token=${accessToken}`;
+    const url = `${baseUrl}?fields=${campaignFields}&access_token=${accessToken}`;
 
     setIsLoading(true); // Use the existing isLoading state to show loading indicator
 
