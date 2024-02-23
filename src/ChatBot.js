@@ -71,7 +71,7 @@ function ChatBot() {
 
     setIsLoading(true);
 
-    const openAIQuestion = `Based on the customer request: "${question}", what fields should we fetch from the Facebook Ads API? Response as field1,field2,field3`;
+    const openAIQuestion = `Based on the customer request: "${question}", what fields should we fetch from the Facebook Ads API? Response as field1,field2,field3,insights.fields(field1, field2, field3)`;
 
     const messagesPayload = [
       {
@@ -108,8 +108,8 @@ function ChatBot() {
 
       const suggestedFields = botResponseContent; // Here you might need to parse the response if it's not in the desired format
 
-      console.log("Suggested Fields:", suggestedFields);
       setCampaignFields(suggestedFields);
+      console.log("Suggested Fields:", campaignFields);
 
       setIsLoading(false);
     } catch (error) {
