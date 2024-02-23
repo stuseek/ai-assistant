@@ -108,7 +108,7 @@ function ChatBot() {
 
       const suggestedFields = botResponseContent; // Here you might need to parse the response if it's not in the desired format
 
-      console.log("Suggested Fields:", campaignFields);
+      console.log("Suggested Fields:", suggestedFields);
 
       setIsLoading(false);
       return suggestedFields;
@@ -198,6 +198,7 @@ function ChatBot() {
 
   const handleSendClick = async () => {
     const suggestedFields = await sendMessageToOpenAI();
+    alert(suggestedFields);
     const campaignInfo = await fetchCampaigns(suggestedFields);
     await interpretateResults(campaignInfo);
     setQuestion('');
@@ -206,7 +207,7 @@ function ChatBot() {
   return (
     <Container maxWidth="sm">
       <Box sx={{my: 4}}>
-        {!isAuthenticated ? (
+        {isAuthenticated ? (
           <>
             <button onClick={checkLoginStatus}>Check Login Status</button>
           </>
