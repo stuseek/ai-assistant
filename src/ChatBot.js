@@ -158,12 +158,12 @@ function ChatBot() {
 
     // Assuming `campaignData` is a string representation of the fetched campaigns
     // Adjust the question to fit your needs for analysis
-    const analysisQuestion = `Based on the following campaign data: "${campaignData}", and considering the user's initial question: "${question}", how can we interpret this information? Be sure you use Campaign name, not ID`;
+    const analysisQuestion = `Based on the following campaign data: "${campaignData}", and considering the user's initial question: "${question}", how can we interpret this information?`;
 
     const messagesPayload = [
       {
         "role": "system",
-        "content": "You are a helpful assistant. Analyze the provided campaign data in the context of the user's initial question and provide insights."
+        "content": "You are a helpful assistant. Analyze the provided campaign data in the context of the user's initial question and provide insights.  Be sure you use Campaign name, not ID. What the param should be shown in dollars other currency please add the symbol."
       },
       {
         "role": "user",
