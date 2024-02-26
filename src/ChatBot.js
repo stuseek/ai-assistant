@@ -76,15 +76,11 @@ function ChatBot() {
     const messagesPayload = [
       {
         "role": "system",
-        "content": "You are a helpful assistant. Analyze the customer request and suggest the fields needed for a Facebook Ads API request."
+        "content": "You are a helpful assistant. Analyze the customer request and suggest the fields needed for a Facebook Ads API request. Allowed fields to fetch: id,name,status,objective,start_time,end_time,budget_remaining,daily_budget,lifetime_budget,spend,impressions,clicks,adsets{id,name,status,budget_remaining,daily_budget,lifetime_budget,start_time,end_time,ads{id,name,status,creative{title,message,image_hash},insights{impressions,clicks,spend,reach,cost_per_impression,cost_per_click,campaign_name,adset_name,ad_name}}},insights{click_through_rate,cost_per_click,conversions,conversion_value,impressions,reach},bid_strategy,targeting{geo_locations{countries},interests,behaviors},creative{image_url,name,body},placements,optimization_goal"
       },
       {
         "role": "user",
         "content": openAIQuestion
-      },
-      {
-        "role": "system",
-        "content": "Allowed fields to fetch: id,name,status,objective,start_time,end_time,budget_remaining,daily_budget,lifetime_budget,spend,impressions,clicks,adsets{id,name,status,budget_remaining,daily_budget,lifetime_budget,start_time,end_time,ads{id,name,status,creative{title,message,image_hash},insights{impressions,clicks,spend,reach,cost_per_impression,cost_per_click,campaign_name,adset_name,ad_name}}},insights{click_through_rate,cost_per_click,conversions,conversion_value,impressions,reach},bid_strategy,targeting{geo_locations{countries},interests,behaviors},creative{image_url,name,body},placements,optimization_goal"
       }
     ];
 
