@@ -121,7 +121,7 @@ function ChatBot() {
       }
 
       const responseData = await response.json();
-      setChat([...chat, {type: 'received', text: responseData.choices[0].message.content}]);
+      setChat([...chat, {role: 'received', content: responseData.choices[0].message.content}]);
       const suggestedFields = responseData.choices[0].message.content; // Here you might need to parse the response if it's not in the desired format
 
       console.log("Suggested Fields:", suggestedFields);
