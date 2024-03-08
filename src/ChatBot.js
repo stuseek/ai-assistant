@@ -194,10 +194,7 @@ function ChatBot() {
       const responseData = await response.json();
       const botResponseContent = responseData.choices[0].message.content;
 
-      setConversationHistory(prevHistory => [
-        ...prevHistory,
-        {role: "assistant", content: botResponseContent}
-      ]);
+      conversationHistory = [...conversationHistory, {role: "assistant", content: botResponseContent}]
 
       // Process the response here, e.g., displaying it in the chat
       setChat([...chat, {type: 'assistant', text: botResponseContent}]);
