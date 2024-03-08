@@ -101,7 +101,7 @@ function ChatBot() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiKey}`
         },
-        body: data
+        body: JSON.stringify(data)
       });
 
       if (!response.ok) {
@@ -184,7 +184,7 @@ function ChatBot() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiKey}`
         },
-        body: data
+        body: JSON.stringify(data)
       });
 
       if (!response.ok) {
