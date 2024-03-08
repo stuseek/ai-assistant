@@ -88,6 +88,7 @@ function ChatBot() {
       ...prevHistory, messagesPayload
     ]);
 
+    console.log('cc', conversationHistory);
 
     const data = {
       model: "gpt-4-turbo-preview",
