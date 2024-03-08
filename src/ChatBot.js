@@ -85,7 +85,7 @@ function ChatBot() {
 
     setIsLoading(true);
 
-    const openAIQuestion = `Based on the customer request: "${question}", what fields should we fetch from the Facebook Ads API? Always add campaign name to the top-level response. Only use real fields from Meta Business API. Answer as field1,field2,field3.fields(field1,field2,field3)`;
+    const openAIQuestion = `Based on the customer request: "${question}", what fields and which endpoint should we fetch from the Facebook Ads API? Always add campaign name to the top-level response. Only use real fields from Meta Business API. Answer as json: endpoint: endpointName, fields: field1,field2,field3.fields(field1,field2,field3)`;
 
     const messagesPayload = [...chat];
 
@@ -122,22 +122,23 @@ function ChatBot() {
 
       const responseData = await response.json();
       setChat([...chat, {role: 'received', content: responseData.choices[0].message.content}]);
-      const suggestedFields = responseData.choices[0].message.content; // Here you might need to parse the response if it's not in the desired format
+      const suggestedFields = responseData.choices[0].message.content.fields; // Here you might need to parse the response if it's not in the desired format
+      const endpoint = responseData.choices[0].message.content.endpoint; // Here you might need to parse the response if it's not in the desired format
 
       console.log("Suggested Fields:", suggestedFields);
 
       setIsLoading(false);
-      return suggestedFields;
+      return {suggestedFields, endpoint};
     } catch (error) {
       setIsLoading(false);
       console.error('Error communicating with OpenAI:', error);
     }
   };
 
-  const fetchCampaigns = async (suggestedFields) => {
+  const fetchCampaigns = async (suggestedFields, endpoint) => {
     const accessToken = authToken;
     const adAccountId = '1785133881702528';
-    const baseUrl = `https://graph.facebook.com/v19.0/act_${adAccountId}/campaigns`;
+    const baseUrl = `https://graph.facebook.com/v19.0/act_${adAccountId}/${endpoint ? endpoint : "campaigns"}`;
     const url = `${baseUrl}?fields=${suggestedFields}&access_token=${accessToken}`;
 
     setIsLoading(true); // Use the existing isLoading state to show loading indicator
@@ -175,7 +176,7 @@ function ChatBot() {
     const messagesPayload = [
       {
         "role": "system",
-        "content": "You are a helpful assistant. Analyze the provided campaign data in the context of the user's initial question and provide insights.  Be sure you use Campaign name, not ID. What the param should be shown in dollars other currency please add the symbol."
+        "content": "You are a helpful assistant. Analyze the provided campaign data in the context of the user's initial question and provide insights. Be sure you use Campaign name, not ID. What the param should be shown in dollars other currency please add the symbol."
       },
       {
         "role": "user",
