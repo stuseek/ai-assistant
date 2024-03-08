@@ -71,7 +71,7 @@ function ChatBot() {
 
     setIsLoading(true);
 
-    const openAIQuestion = `Based on the customer request: "${question}", what endpoint and fields should we fetch from the Facebook Ads API? Always add name to the top-level fields. Only use real fields from Meta Business API. Answer ONLY JSON: endpoint: "endpoint", fields: "field1,field2,field3.fields(field1,field2,field3)"`;
+    const openAIQuestion = `Based on the customer request: "${question}", what endpoint and fields should we fetch from the Facebook Ads API? Always add name to the top-level fields. Only use real fields from Meta Business API. Answer as a JSON: endpoint: "endpoint", fields: "field1,field2,field3.fields(field1,field2,field3)"`;
 
     const messagesPayload = [
       {
