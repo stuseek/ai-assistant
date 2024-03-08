@@ -71,7 +71,7 @@ function ChatBot() {
 
     setIsLoading(true);
 
-    const openAIQuestion = `Based on the customer request: "${question}", what endpoint and fields should we fetch from the Facebook Ads API? Always add name to the top-level response. Only use real fields from Meta Business API. Answer as JSON: endpoint: "endpoint", fields: "field1,field2,field3.fields(field1,field2,field3)"`;
+    const openAIQuestion = `Based on the customer request: "${question}", what endpoint and fields should we fetch from the Facebook Ads API? Always add name to the top-level fields. Only use real fields from Meta Business API. Answer ONLY JSON: endpoint: "endpoint", fields: "field1,field2,field3.fields(field1,field2,field3)"`;
 
     const messagesPayload = [
       {
@@ -191,13 +191,13 @@ function ChatBot() {
       const botResponseContent = responseData.choices[0].message.content;
 
       // Process the response here, e.g., displaying it in the chat
-      setChat([...chat, {type: 'received', text: botResponseContent}]);
+      setChat([...chat, {role: 'received', content: botResponseContent}]);
 
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
       console.error('Error communicating with OpenAI for result interpretation:', error);
-      setChat([...chat, {type: 'error', text: 'Error interpreting campaign information'}]);
+      setChat([...chat, {role: 'error', content: 'Error interpreting campaign information'}]);
     }
   };
 
