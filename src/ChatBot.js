@@ -87,11 +87,11 @@ function ChatBot() {
 
     conversationHistory = [...conversationHistory, messagesPayload]
 
-    console.log('cc', conversationHistory);
+    console.log('cc', conversationHistory[0]);
 
     const data = {
       model: "gpt-4-turbo-preview",
-      messages: conversationHistory,
+      messages: conversationHistory[0],
     };
 
     try {
@@ -174,7 +174,7 @@ function ChatBot() {
 
     const data = {
       model: "gpt-4-turbo-preview",
-      messages: conversationHistory,
+      messages: conversationHistory[0],
     };
 
     try {
