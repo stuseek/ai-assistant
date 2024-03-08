@@ -278,10 +278,10 @@ function ChatBot() {
                       <React.Fragment key={index}>
                         <ListItem alignItems="flex-start">
                           <ListItemText
-                            primary={chatMessage.type === 'sent' ? 'You' : chatMessage.role === 'assistant' ? 'Assistant' : 'Error'}
+                            primary={chatMessage.type !== 'assistant' ? 'You' : chatMessage.role === 'assistant' ? 'Assistant' : 'Error'}
                             secondary={<ReactMarkdown>{chatMessage.content}</ReactMarkdown>}
                             primaryTypographyProps={{
-                              color: chatMessage.type === 'sent' ? 'primary' : 'textSecondary',
+                              color: chatMessage.type !== 'assistant' ? 'primary' : 'textSecondary',
                               fontWeight: 'fontWeightBold',
                             }}
                           />
