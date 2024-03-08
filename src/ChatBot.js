@@ -85,8 +85,8 @@ function ChatBot() {
     ];
 
     const data = {
-      model: "gpt-4",
-      messages: messagesPayload,
+      model: "gpt-4-turbo-preview",
+      messages: conversationHistory,
     };
 
     try {
@@ -105,6 +105,12 @@ function ChatBot() {
 
       const responseData = await response.json();
       const botResponseContent = JSON.parse(responseData.choices[0].message.content);
+
+
+      setConversationHistory(prevHistory => [
+        ...prevHistory,
+        {role: "assistant", content: botResponseContent} // Assuming botResponseContent is your parsed response
+      ]);
 
       const suggestedFields = botResponseContent.fields; // Here you might need to parse the response if it's not in the desired format
       const endpoint = botResponseContent.endpoint; // Here you might need to parse the response if it's not in the desired format
@@ -153,6 +159,11 @@ function ChatBot() {
 
     setIsLoading(true);
 
+    setConversationHistory(prevHistory => [
+      ...prevHistory,
+      {role: "user", content: question}
+    ]);
+
     // Assuming `campaignData` is a string representation of the fetched campaigns
     // Adjust the question to fit your needs for analysis
     const analysisQuestion = `Based on the following campaign data: "${campaignData}", and considering the user's initial question: "${question}", how can we interpret this information? Don't answer long. If there is lack of data to answer the question, respond "nodata"`;
@@ -170,7 +181,7 @@ function ChatBot() {
 
     const data = {
       model: "gpt-4-turbo-preview",
-      messages: messagesPayload,
+      messages: conversationHistory,
     };
 
     try {
@@ -189,6 +200,11 @@ function ChatBot() {
 
       const responseData = await response.json();
       const botResponseContent = responseData.choices[0].message.content;
+
+      setConversationHistory(prevHistory => [
+        ...prevHistory,
+        {role: "assistant", content: botResponseContent}
+      ]);
 
       // Process the response here, e.g., displaying it in the chat
       setChat([...chat, {type: 'assistant', text: botResponseContent}]);
