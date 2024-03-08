@@ -71,7 +71,7 @@ function ChatBot() {
 
     setIsLoading(true);
 
-    const openAIQuestion = `Based on the customer request: "${question}", what endpoint and fields should we fetch from the Facebook Ads API? Always add name to the top-level fields. Only use real fields from Meta Business API. Answer nothing else but JSON: endpoint: "endpoint", fields: "field1,field2,field3.fields(field1,field2,field3)"`;
+    const openAIQuestion = `Based on the customer request: "${question}", and message history, what endpoint and fields should we fetch from the Facebook Ads API? Always add name to the top-level fields. Only use real fields from Meta Business API. Answer nothing else but JSON: endpoint: "endpoint", fields: "field1,field2,field3.fields(field1,field2,field3)"`;
 
     const messagesPayload = [
       {
@@ -83,6 +83,11 @@ function ChatBot() {
         "content": openAIQuestion
       }
     ];
+
+    setConversationHistory(prevHistory => [
+      ...prevHistory, messagesPayload
+    ]);
+
 
     const data = {
       model: "gpt-4-turbo-preview",
@@ -159,11 +164,6 @@ function ChatBot() {
 
     setIsLoading(true);
 
-    setConversationHistory(prevHistory => [
-      ...prevHistory,
-      {role: "user", content: question}
-    ]);
-
     // Assuming `campaignData` is a string representation of the fetched campaigns
     // Adjust the question to fit your needs for analysis
     const analysisQuestion = `Based on the following campaign data: "${campaignData}", and considering the user's initial question: "${question}", how can we interpret this information? Don't answer long. If there is lack of data to answer the question, respond "nodata"`;
@@ -178,6 +178,10 @@ function ChatBot() {
         "content": analysisQuestion
       }
     ];
+
+    setConversationHistory(prevHistory => [
+      ...prevHistory, messagesPayload
+    ]);
 
     const data = {
       model: "gpt-4-turbo-preview",
