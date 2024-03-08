@@ -207,13 +207,13 @@ function ChatBot() {
       const botResponseContent = responseData.choices[0].message.content;
 
       // Process the response here, e.g., displaying it in the chat
-      setChat([...chat, {type: 'received', text: `Insights: ${botResponseContent}`}]);
+      setChat([...chat, {role: 'received', content: `Insights: ${botResponseContent}`}]);
 
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
       console.error('Error communicating with OpenAI for result interpretation:', error);
-      setChat([...chat, {type: 'error', text: 'Error interpreting campaign information'}]);
+      setChat([...chat, {role: 'error', content: 'Error interpreting campaign information'}]);
     }
   };
 
