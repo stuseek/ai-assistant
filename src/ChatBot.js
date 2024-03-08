@@ -1,27 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import ReactMarkdown from 'react-markdown';
 import {
-  AppBar,
-  Box,
-  Button,
-  CircularProgress,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Drawer,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-  TextField,
-  Toolbar,
-  Typography
+  Container, TextField, Button, Box, List, ListItem, ListItemText, Paper,
+  AppBar, Toolbar, IconButton, Drawer, Typography, Dialog, DialogTitle,
+  DialogContent, DialogActions
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import SettingsIcon from '@mui/icons-material/Settings';
+import {CircularProgress} from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
 
 function ChatBot() {
@@ -85,11 +71,9 @@ function ChatBot() {
 
     setIsLoading(true);
 
-    const openAIQuestion = `Based on the customer request: "${question}", what fields and which endpoint should we fetch from the Facebook Ads API? Always add campaign name to the top-level response. Only use real fields from Meta Business API. Answer as json: endpoint: endpointName, fields: field1,field2,field3.fields(field1,field2,field3)`;
+    const openAIQuestion = `Based on the customer request: "${question}", what fields should we fetch from the Facebook Ads API? Always add campaign name to the top-level response. Only use real fields from Meta Business API. Answer as field1,field2,field3.fields(field1,field2,field3)`;
 
-    const messagesPayload = [...chat];
-
-    messagesPayload.push([
+    const messagesPayload = [
       {
         "role": "system",
         "content": "You are a helpful assistant. Analyze the customer request and suggest the fields needed for a Facebook Ads API request. Allowed fields to fetch: account_id,adlabels,bid_strategy,boosted_object_id,brand_lift_studies,budget_rebalance_flag,budget_remaining,buying_type,campaign_group_active_time,can_create_brand_lift_study,can_use_spend_cap,configured_status,created_time,daily_budget,effective_status,has_secondary_skadnetwork_reporting,id,is_budget_schedule_enabled,is_skadnetwork_attribution,issues_info,last_budget_toggling_time,lifetime_budget,name,objective,pacing_type,primary_attribution,smart_promotion_type,source_campaign,promoted_object,source_campaign_id,special_ad_categories,special_ad_category,special_ad_category_country,spend_cap,start_time,status,stop_time,topline_id,updated_time,ad_studies,adrules_governed,ads,adsets,budget_schedules,copies,insights{account_currency,account_id,action_values,account_name,ad_id,ad_name,adset_id,adset_name,app_id,attribution_setting,buying_type,campaign_id,campaign_name,canvas_avg_view_percent,canvas_avg_view_time,catalog_segment_value,clicks,coarse_conversion_value,conversion_rate_ranking,conversion_values,conversions,converted_product_quantity,converted_product_value,cost_per_action_type,cost_per_conversion,actions,cost_per_estimated_ad_recallers,cost_per_inline_link_click,cost_per_inline_post_engagement,cost_per_outbound_click,cost_per_thruplay,cost_per_unique_action_type,cost_per_unique_click,cost_per_unique_inline_link_click,cost_per_unique_outbound_click,cpc,cpm,cpp,ctr,date_start,date_stop,dda_results,engagement_rate_ranking,estimated_ad_recall_rate,estimated_ad_recallers,fidelity_type,frequency,full_view_impressions,full_view_reach,hsid,impressions,inline_link_click_ctr,inline_link_clicks,inline_post_engagement,instagram_upcoming_event_reminders_set,instant_experience_clicks_to_open,instant_experience_clicks_to_start,instant_experience_outbound_clicks,is_conversion_id_modeled,landing_destination,mobile_app_purchase_roas,objective,optimization_goal,outbound_clicks,outbound_clicks_ctr,place_page_name,postback_sequence_index,purchase_roas,qualifying_question_qualify_answer_rate,quality_ranking,reach,redownload,skan_campaign_id,skan_conversion_id,social_spend,spend,total_postbacks,total_postbacks_detailed,total_postbacks_detailed_v4,user_segment_key,video_30_sec_watched_actions,video_avg_time_watched_actions,video_p100_watched_actions,video_p25_watched_actions,video_p50_watched_actions,video_p75_watched_actions,video_p95_watched_actions,video_play_actions,video_play_curve_actions,website_ctr,website_purchase_roas}"
@@ -98,8 +82,7 @@ function ChatBot() {
         "role": "user",
         "content": openAIQuestion
       }
-    ]);
-
+    ];
 
     const data = {
       model: "gpt-4",
@@ -113,7 +96,7 @@ function ChatBot() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiKey}`
         },
-        body: data
+        body: JSON.stringify(data)
       });
 
       if (!response.ok) {
@@ -121,24 +104,24 @@ function ChatBot() {
       }
 
       const responseData = await response.json();
-      setChat([...chat, {role: 'received', content: responseData.choices[0].message.content}]);
-      const suggestedFields = responseData.choices[0].message.content.fields; // Here you might need to parse the response if it's not in the desired format
-      const endpoint = responseData.choices[0].message.content.endpoint; // Here you might need to parse the response if it's not in the desired format
+      const botResponseContent = responseData.choices[0].message.content;
+
+      const suggestedFields = botResponseContent; // Here you might need to parse the response if it's not in the desired format
 
       console.log("Suggested Fields:", suggestedFields);
 
       setIsLoading(false);
-      return {suggestedFields, endpoint};
+      return suggestedFields;
     } catch (error) {
       setIsLoading(false);
       console.error('Error communicating with OpenAI:', error);
     }
   };
 
-  const fetchCampaigns = async (suggestedFields, endpoint) => {
+  const fetchCampaigns = async (suggestedFields) => {
     const accessToken = authToken;
     const adAccountId = '1785133881702528';
-    const baseUrl = `https://graph.facebook.com/v19.0/act_${adAccountId}/${endpoint ? endpoint : "campaigns"}`;
+    const baseUrl = `https://graph.facebook.com/v19.0/act_${adAccountId}/campaigns`;
     const url = `${baseUrl}?fields=${suggestedFields}&access_token=${accessToken}`;
 
     setIsLoading(true); // Use the existing isLoading state to show loading indicator
@@ -176,7 +159,7 @@ function ChatBot() {
     const messagesPayload = [
       {
         "role": "system",
-        "content": "You are a helpful assistant. Analyze the provided campaign data in the context of the user's initial question and provide insights. Be sure you use Campaign name, not ID. What the param should be shown in dollars other currency please add the symbol."
+        "content": "You are a helpful assistant. Analyze the provided campaign data in the context of the user's initial question and provide insights.  Be sure you use Campaign name, not ID. What the param should be shown in dollars other currency please add the symbol."
       },
       {
         "role": "user",
@@ -207,13 +190,13 @@ function ChatBot() {
       const botResponseContent = responseData.choices[0].message.content;
 
       // Process the response here, e.g., displaying it in the chat
-      setChat([...chat, {role: 'received', content: `Insights: ${botResponseContent}`}]);
+      setChat([...chat, {type: 'received', text: `Insights: ${botResponseContent}`}]);
 
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
       console.error('Error communicating with OpenAI for result interpretation:', error);
-      setChat([...chat, {role: 'error', content: 'Error interpreting campaign information'}]);
+      setChat([...chat, {type: 'error', text: 'Error interpreting campaign information'}]);
     }
   };
 
