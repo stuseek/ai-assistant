@@ -18,10 +18,11 @@ function ChatBot() {
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [isSettingsOpen, setSettingsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [conversationHistory, setConversationHistory] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authToken, setAuthToken] = useState(false);
   const [campaignFields, setCampaignFields] = useState('');
+
+  let conversationHistory = [];
 
   const checkLoginStatus = () => {
     window.FB.getLoginStatus(function (response) {
@@ -84,9 +85,7 @@ function ChatBot() {
       }
     ];
 
-    const tempHistory = [...conversationHistory, messagesPayload];
-
-    setConversationHistory(prevHistory => tempHistory);
+    conversationHistory = [...conversationHistory, messagesPayload]
 
     console.log('cc', conversationHistory);
 
@@ -113,10 +112,7 @@ function ChatBot() {
       const botResponseContent = JSON.parse(responseData.choices[0].message.content);
 
 
-      setConversationHistory(prevHistory => [
-        ...prevHistory,
-        {role: "assistant", content: botResponseContent} // Assuming botResponseContent is your parsed response
-      ]);
+      conversationHistory = [...conversationHistory, {role: "assistant", content: botResponseContent}]
 
       const suggestedFields = botResponseContent.fields; // Here you might need to parse the response if it's not in the desired format
       const endpoint = botResponseContent.endpoint; // Here you might need to parse the response if it's not in the desired format
@@ -154,12 +150,6 @@ function ChatBot() {
     }
   };
 
-  const addMessageToHistory = (message, type = 'sent') => {
-    const newMessage = {text: message, type};
-
-    setConversationHistory(prevHistory => [...prevHistory, newMessage]);
-  };
-
   const interpretateResults = async (campaignData = '') => {
     if (!campaignData.trim()) return;
 
@@ -180,10 +170,7 @@ function ChatBot() {
       }
     ];
 
-    const tempHistory = [...conversationHistory, messagesPayload];
-
-    setConversationHistory(prevHistory => tempHistory);
-
+    conversationHistory = [...conversationHistory, messagesPayload]
 
     const data = {
       model: "gpt-4-turbo-preview",
