@@ -191,7 +191,7 @@ function ChatBot() {
       const botResponseContent = responseData.choices[0].message.content;
 
       // Process the response here, e.g., displaying it in the chat
-      setChat([...chat, {role: 'received', content: botResponseContent}]);
+      setChat([...chat, {role: 'assistant', content: botResponseContent}]);
 
       setIsLoading(false);
     } catch (error) {
