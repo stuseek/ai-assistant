@@ -104,7 +104,7 @@ function ChatBot() {
       }
 
       const responseData = await response.json();
-      const botResponseContent = responseData.choices[0].message.content;
+      const botResponseContent = JSON.parse(responseData.choices[0].message.content);
 
       const suggestedFields = botResponseContent.fields; // Here you might need to parse the response if it's not in the desired format
       const endpoint = botResponseContent.endpoint; // Here you might need to parse the response if it's not in the desired format
