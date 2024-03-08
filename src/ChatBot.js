@@ -155,7 +155,7 @@ function ChatBot() {
 
     // Assuming `campaignData` is a string representation of the fetched campaigns
     // Adjust the question to fit your needs for analysis
-    const analysisQuestion = `Based on the following campaign data: "${campaignData}", and considering the user's initial question: "${question}", how can we interpret this information? Don't answer long`;
+    const analysisQuestion = `Based on the following campaign data: "${campaignData}", and considering the user's initial question: "${question}", how can we interpret this information? Don't answer long. If there is lack of data to answer the question, respond "nodata"`;
 
     const messagesPayload = [
       {
@@ -170,7 +170,7 @@ function ChatBot() {
 
     const data = {
       model: "gpt-4-turbo-preview",
-      messages: [...chat, ...messagesPayload],
+      messages: messagesPayload,
     };
 
     try {
@@ -191,19 +191,18 @@ function ChatBot() {
       const botResponseContent = responseData.choices[0].message.content;
 
       // Process the response here, e.g., displaying it in the chat
-      setChat([...chat, {role: 'assistant', content: botResponseContent}]);
+      setChat([...chat, {type: 'assistant', text: botResponseContent}]);
 
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
       console.error('Error communicating with OpenAI for result interpretation:', error);
-      setChat([...chat, {role: 'error', content: 'Error interpreting campaign information'}]);
+      setChat([...chat, {type: 'error', text: 'Error interpreting campaign information'}]);
     }
   };
 
   const handleSendClick = async () => {
     const {suggestedFields, endpoint} = await sendMessageToOpenAI();
-    // addMessageToHistory(question, 'sent');
     const campaignInfo = await fetchCampaigns(suggestedFields, endpoint);
     await interpretateResults(campaignInfo);
     setQuestion('');
@@ -278,10 +277,10 @@ function ChatBot() {
                       <React.Fragment key={index}>
                         <ListItem alignItems="flex-start">
                           <ListItemText
-                            primary={chatMessage.type !== 'assistant' ? 'You' : chatMessage.role === 'assistant' ? 'Assistant' : 'Error'}
-                            secondary={<ReactMarkdown>{chatMessage.content}</ReactMarkdown>}
+                            primary={chatMessage.type === 'sent' ? 'You' : chatMessage.role === 'assistant' ? 'Assistant' : 'Error'}
+                            secondary={<ReactMarkdown>{chatMessage.text}</ReactMarkdown>}
                             primaryTypographyProps={{
-                              color: chatMessage.type !== 'assistant' ? 'primary' : 'textSecondary',
+                              color: chatMessage.type === 'sent' ? 'primary' : 'textSecondary',
                               fontWeight: 'fontWeightBold',
                             }}
                           />
