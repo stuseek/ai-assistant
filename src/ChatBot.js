@@ -71,7 +71,7 @@ function ChatBot() {
 
     setIsLoading(true);
 
-    const openAIQuestion = `Based on the customer request: "${question}", what fields should we fetch from the Facebook Ads API? Always add campaign name to the top-level response. Only use real fields from Meta Business API. Answer as field1,field2,field3.fields(field1,field2,field3)`;
+    const openAIQuestion = `Based on the customer request: "${question}", what endpoint and fields should we fetch from the Facebook Ads API? Always add name to the top-level response. Only use real fields from Meta Business API. Answer as JSON: endpoint: "endpoint", fields: "field1,field2,field3.fields(field1,field2,field3)"`;
 
     const messagesPayload = [
       {
@@ -106,22 +106,23 @@ function ChatBot() {
       const responseData = await response.json();
       const botResponseContent = responseData.choices[0].message.content;
 
-      const suggestedFields = botResponseContent; // Here you might need to parse the response if it's not in the desired format
+      const suggestedFields = botResponseContent.fields; // Here you might need to parse the response if it's not in the desired format
+      const endpoint = botResponseContent.endpoint; // Here you might need to parse the response if it's not in the desired format
 
       console.log("Suggested Fields:", suggestedFields);
 
       setIsLoading(false);
-      return suggestedFields;
+      return {suggestedFields, endpoint};
     } catch (error) {
       setIsLoading(false);
       console.error('Error communicating with OpenAI:', error);
     }
   };
 
-  const fetchCampaigns = async (suggestedFields) => {
+  const fetchCampaigns = async (suggestedFields, endpoint) => {
     const accessToken = authToken;
     const adAccountId = '1785133881702528';
-    const baseUrl = `https://graph.facebook.com/v19.0/act_${adAccountId}/campaigns`;
+    const baseUrl = `https://graph.facebook.com/v19.0/act_${adAccountId}/${endpoint}`;
     const url = `${baseUrl}?fields=${suggestedFields}&access_token=${accessToken}`;
 
     setIsLoading(true); // Use the existing isLoading state to show loading indicator
@@ -142,7 +143,7 @@ function ChatBot() {
   };
 
   const addMessageToHistory = (message, type = 'sent') => {
-    const newMessage = { text: message, type };
+    const newMessage = {text: message, type};
 
     setConversationHistory(prevHistory => [...prevHistory, newMessage]);
   };
@@ -169,7 +170,7 @@ function ChatBot() {
 
     const data = {
       model: "gpt-4-turbo-preview",
-      messages: messagesPayload,
+      messages: [...chat, ...messagesPayload],
     };
 
     try {
@@ -190,7 +191,7 @@ function ChatBot() {
       const botResponseContent = responseData.choices[0].message.content;
 
       // Process the response here, e.g., displaying it in the chat
-      setChat([...chat, {type: 'received', text: `Insights: ${botResponseContent}`}]);
+      setChat([...chat, {type: 'received', text: botResponseContent}]);
 
       setIsLoading(false);
     } catch (error) {
@@ -201,10 +202,9 @@ function ChatBot() {
   };
 
   const handleSendClick = async () => {
-    const suggestedFields = await sendMessageToOpenAI();
-    // alert(suggestedFields);
-    addMessageToHistory(question, 'sent'); // Add the user's question to history
-    const campaignInfo = await fetchCampaigns(suggestedFields);
+    const {suggestedFields, endpoint} = await sendMessageToOpenAI();
+    // addMessageToHistory(question, 'sent');
+    const campaignInfo = await fetchCampaigns(suggestedFields, endpoint);
     await interpretateResults(campaignInfo);
     setQuestion('');
   };
