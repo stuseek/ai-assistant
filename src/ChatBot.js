@@ -85,13 +85,11 @@ function ChatBot() {
       }
     ];
 
-    conversationHistory = [...conversationHistory, messagesPayload]
-
-    console.log('cc', conversationHistory[0]);
+    conversationHistory.push(messagesPayload);
 
     const data = {
       model: "gpt-4-turbo-preview",
-      messages: conversationHistory[0],
+      messages: conversationHistory,
     };
 
     try {
@@ -112,7 +110,7 @@ function ChatBot() {
       const botResponseContent = JSON.parse(responseData.choices[0].message.content);
 
 
-      conversationHistory = [...conversationHistory, {role: "assistant", content: botResponseContent}]
+      conversationHistory.push({role: "assistant", content: botResponseContent});
 
       const suggestedFields = botResponseContent.fields; // Here you might need to parse the response if it's not in the desired format
       const endpoint = botResponseContent.endpoint; // Here you might need to parse the response if it's not in the desired format
@@ -170,11 +168,11 @@ function ChatBot() {
       }
     ];
 
-    conversationHistory = [...conversationHistory, messagesPayload]
+    conversationHistory.push(messagesPayload);
 
     const data = {
       model: "gpt-4-turbo-preview",
-      messages: conversationHistory[0],
+      messages: conversationHistory,
     };
 
     try {
@@ -194,7 +192,7 @@ function ChatBot() {
       const responseData = await response.json();
       const botResponseContent = responseData.choices[0].message.content;
 
-      conversationHistory = [...conversationHistory, {role: "assistant", content: botResponseContent}]
+      conversationHistory.push({role: "assistant", content: botResponseContent});
 
       // Process the response here, e.g., displaying it in the chat
       setChat([...chat, {type: 'assistant', text: botResponseContent}]);
