@@ -113,7 +113,7 @@ function ChatBot() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiKey}`
         },
-        body: JSON.stringify(data)
+        body: data
       });
 
       if (!response.ok) {
