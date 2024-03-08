@@ -84,9 +84,9 @@ function ChatBot() {
       }
     ];
 
-    setConversationHistory(prevHistory => [
-      ...prevHistory, messagesPayload
-    ]);
+    const tempHistory = [...conversationHistory, messagesPayload];
+
+    setConversationHistory(prevHistory => tempHistory);
 
     console.log('cc', conversationHistory);
 
@@ -180,9 +180,10 @@ function ChatBot() {
       }
     ];
 
-    setConversationHistory(prevHistory => [
-      ...prevHistory, messagesPayload
-    ]);
+    const tempHistory = [...conversationHistory, messagesPayload];
+
+    setConversationHistory(prevHistory => tempHistory);
+
 
     const data = {
       model: "gpt-4-turbo-preview",
