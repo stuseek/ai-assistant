@@ -67,12 +67,23 @@ function ChatBot() {
     setAdditionalInfo(event.target.value);
   };
 
+  const addMessageToChat = (message) => {
+    setChat((prevChat) => [
+      ...prevChat,
+      {
+        ...message,
+        // Ensure the message text is a string
+        text: typeof message.text === 'string' ? message.text : JSON.stringify(message.text)
+      }
+    ]);
+  };
+
   const sendMessageToOpenAI = async () => {
     if (!question.trim()) return;
 
     setIsLoading(true);
 
-    const openAIQuestion = `Based on the customer request: "${question}", and message history, what endpoint and fields should we fetch from the Facebook Ads API? Always add name to the top-level fields. Only use real fields from Meta Business API. Answer nothing else but JSON: endpoint: "endpoint", fields: "field1,field2,field3.fields(field1,field2,field3)"`;
+    const openAIQuestion = `Based on the customer request: "${question}", and message history, what endpoint and fields should we fetch from the Facebook Ads API? Always add name to the top-level fields. Only use real fields from Meta Business API. Respond in JSON with such fields (example): endpoint: endpoint, fields: field1,field2,field3.fields(field1,field2,field3{subfield1,subfield2}). Do not add anything else, just return stringified json. Do not add markdown.`;
 
     const messagesPayload = [
       {
@@ -85,11 +96,16 @@ function ChatBot() {
       }
     ];
 
-    conversationHistory.push(messagesPayload);
+    addMessageToChat({ type: 'sent', text: question });
+
+    messagesPayload.forEach((message) => {
+      conversationHistory.push(message);
+    });
 
     const data = {
       model: "gpt-4-turbo-preview",
       messages: conversationHistory,
+      response_format: { "type": "json_object" }
     };
 
     try {
@@ -110,7 +126,7 @@ function ChatBot() {
       const botResponseContent = JSON.parse(responseData.choices[0].message.content);
 
 
-      conversationHistory.push({role: "assistant", content: botResponseContent});
+      conversationHistory.push({role: "assistant", content: JSON.stringify(botResponseContent)});
 
       const suggestedFields = botResponseContent.fields; // Here you might need to parse the response if it's not in the desired format
       const endpoint = botResponseContent.endpoint; // Here you might need to parse the response if it's not in the desired format
@@ -142,9 +158,10 @@ function ChatBot() {
       setIsLoading(false); // Hide loading indicator
       return JSON.stringify(data.data);
     } catch (error) {
+      debugger;
       console.error("Error fetching campaigns:", error);
-      setIsLoading(false); // Hide loading indicator
-      setChat([...chat, {type: 'error', text: 'Error fetching campaign information'}]);
+      setIsLoading(false);
+      addMessageToChat({type: 'error', text: 'Error fetching campaign information'});
     }
   };
 
@@ -155,7 +172,7 @@ function ChatBot() {
 
     // Assuming `campaignData` is a string representation of the fetched campaigns
     // Adjust the question to fit your needs for analysis
-    const analysisQuestion = `Based on the following campaign data: "${campaignData}", and considering the user's initial question: "${question}", how can we interpret this information? Don't answer long. If there is lack of data to answer the question, respond "nodata"`;
+    const analysisQuestion = `Based on the following campaign data: "${campaignData}", and considering the user's initial question: "${question}", how can we interpret this information? Don't answer long, but format it in nice way. If there is lack of data to answer the question, respond "nodata"`;
 
     const messagesPayload = [
       {
@@ -168,7 +185,9 @@ function ChatBot() {
       }
     ];
 
-    conversationHistory.push(messagesPayload);
+    messagesPayload.forEach((message) => {
+      conversationHistory.push(message);
+    });
 
     const data = {
       model: "gpt-4-turbo-preview",
@@ -195,13 +214,13 @@ function ChatBot() {
       conversationHistory.push({role: "assistant", content: botResponseContent});
 
       // Process the response here, e.g., displaying it in the chat
-      setChat([...chat, {type: 'assistant', text: botResponseContent}]);
+      addMessageToChat({type: 'assistant', text: botResponseContent});
 
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
       console.error('Error communicating with OpenAI for result interpretation:', error);
-      setChat([...chat, {type: 'error', text: 'Error interpreting campaign information'}]);
+      addMessageToChat({type: 'error', text: 'Error interpreting campaign information'});
     }
   };
 
