@@ -103,7 +103,7 @@ function ChatBot() {
     });
 
     const data = {
-      model: "gpt-4-turbo-preview",
+      model: "gpt-3.5-turbo",
       messages: conversationHistory,
       response_format: { "type": "json_object" }
     };
@@ -190,7 +190,7 @@ function ChatBot() {
     });
 
     const data = {
-      model: "gpt-4-turbo-preview",
+      model: "gpt-3.5-turbo",
       messages: conversationHistory,
     };
 
