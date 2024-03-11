@@ -172,7 +172,7 @@ function ChatBot() {
 
     // Assuming `campaignData` is a string representation of the fetched campaigns
     // Adjust the question to fit your needs for analysis
-    const analysisQuestion = `Based on the following campaign data: "${campaignData}", and considering the user's initial question: "${question}", how can we interpret this information? Don't answer long, but format it in nice way. If there is lack of data to answer the question, respond "nodata"`;
+    const analysisQuestion = `Based on the following campaign data: "${campaignData}", and considering the user's initial question: "${question}", how can we interpret this information? Don't answer too long, but format it in nice way.`;
 
     const messagesPayload = [
       {
