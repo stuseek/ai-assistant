@@ -300,7 +300,7 @@ function ChatBot() {
                       <React.Fragment key={index}>
                         <ListItem alignItems="flex-start">
                           <ListItemText
-                            primary={chatMessage.type === 'sent' ? 'You' : chatMessage.role === 'assistant' ? 'Assistant' : 'Error'}
+                            primary={chatMessage.type === 'sent' ? 'You' : chatMessage.role === 'Assistant'}
                             secondary={<ReactMarkdown>{chatMessage.text}</ReactMarkdown>}
                             primaryTypographyProps={{
                               color: chatMessage.type === 'sent' ? 'primary' : 'textSecondary',
