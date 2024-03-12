@@ -20,7 +20,7 @@ function ChatBot() {
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authToken, setAuthToken] = useState(false);
-  const [campaignFields, setCampaignFields] = useState('');
+  const [gptVersion, setGptVersion] = useState('gpt-4-turbo-preview');
 
   let conversationHistory = [];
 
@@ -57,6 +57,10 @@ function ChatBot() {
 
   const handleApiKeyChange = (event) => {
     setApiKey(event.target.value);
+  };
+
+  const handleGptVersionChange = (event) => {
+    setGptVersion(event.target.value);
   };
 
   const handleQuestionChange = (event) => {
@@ -103,7 +107,7 @@ function ChatBot() {
     });
 
     const data = {
-      model: "gpt-3.5-turbo",
+      model: gptVersion,
       messages: conversationHistory,
       response_format: { "type": "json_object" }
     };
@@ -190,7 +194,7 @@ function ChatBot() {
     });
 
     const data = {
-      model: "gpt-3.5-turbo",
+      model: gptVersion,
       messages: conversationHistory,
     };
 
@@ -265,6 +269,16 @@ function ChatBot() {
                       margin="dense"
                       value={apiKey}
                       onChange={handleApiKeyChange}
+                    />
+                  </ListItem>
+                  <ListItem>
+                    <TextField
+                      label="GPT Version"
+                      variant="outlined"
+                      fullWidth
+                      margin="dense"
+                      value={gptVersion}
+                      onChange={handleGptVersionChange}
                     />
                   </ListItem>
                 </List>
