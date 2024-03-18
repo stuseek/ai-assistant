@@ -156,35 +156,51 @@ function ChatBot() {
     try {
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error(`Facebook API responded with status: ${response.status}`);
       }
       const data = await response.json();
       setIsLoading(false);
-      return JSON.stringify(data.data); // Process success response
+      return JSON.stringify(data.data);
     } catch (error) {
       console.error("Error fetching campaigns:", error);
       setIsLoading(false);
-
-      const errorMessage = `Encountered an error while fetching data from the Facebook API: ${error}. How should I adjust the fields or endpoint to successfully fetch the data?`;
-      await sendErrorToOpenAI(errorMessage);
+      processApiError(error.toString()); // Process the error with ChatGPT
     }
   };
 
-  const sendErrorToOpenAI = async (errorMessage) => {
-    conversationHistory.push({
-      role: "system",
-      content: "Adjust fields or endpoints based on the Facebook API error encountered."
-    }, {
+  const processApiError = async (errorMessage) => {
+    // Format your message or question to send to ChatGPT based on the error
+    const questionToChatGPT = `I encountered an error while trying to fetch data from the Facebook API: "${errorMessage}". Can you provide advice on how to resolve this issue?`;
+
+    // You might need to adjust the message format based on your application's design
+    // This is just a simple example
+    const chatGPTMessage = {
       role: "user",
-      content: errorMessage
+      content: questionToChatGPT
+    };
+
+    // Add the error message to your chat UI or log, as appropriate
+    addMessageToChat({type: 'error', text: errorMessage});
+
+    // Here, you would call the same API or a similar function that sends messages to ChatGPT
+    // This example assumes you have a function similar to sendMessageToOpenAI() that can handle this
+    // Adjust the function call as necessary to fit your application's architecture
+    sendMessageToOpenAI(chatGPTMessage).then(response => {
+      // Handle the response from ChatGPT about the error
+      // For example, display advice or steps to resolve the issue in your UI
+      console.log(response); // Or update the UI accordingly
+    }).catch(error => {
+      console.error('Error processing API error with ChatGPT:', error);
     });
-  }
+  };
 
   const interpretateResults = async (campaignData = '') => {
     if (!campaignData.trim()) return;
 
     setIsLoading(true);
 
+    // Assuming `campaignData` is a string representation of the fetched campaigns
+    // Adjust the question to fit your needs for analysis
     const analysisQuestion = `Based on the following campaign data: "${campaignData}", and considering the user's initial question: "${question}", how can we interpret this information? Don't answer long, but be nice.`;
 
     const messagesPayload = [
@@ -236,26 +252,6 @@ function ChatBot() {
       addMessageToChat({type: 'error', text: 'Error interpreting campaign information'});
     }
   };
-
-  // Assuming this function is called after receiving an error from Facebook API
-  async function handleFacebookApiError(errorResponse, originalQuestion) {
-    // Extract error information
-    const errorCode = errorResponse.error.code;
-    const errorMessage = errorResponse.error.message;
-
-    // Formulate a question for OpenAI
-    const openAIQuestion = `I received an error when querying the Facebook API with the following details: Error Code ${errorCode}, Error Message: ${errorMessage}. Based on this, how should I update my fields or endpoint for the following question: "${originalQuestion}"?`;
-
-    try {
-      const openAIResponse = await sendQuestionToOpenAI(openAIQuestion);
-      const suggestion = openAIResponse.choices[0].text;
-
-      console.log("Suggestion from OpenAI:", suggestion);
-
-    } catch (error) {
-      console.error("Error consulting OpenAI:", error);
-    }
-  }
 
   const handleSendClick = async () => {
     const {suggestedFields, endpoint} = await sendMessageToOpenAI();
