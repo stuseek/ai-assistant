@@ -159,23 +159,31 @@ function ChatBot() {
         throw new Error('Network response was not ok');
       }
       const data = await response.json();
-      setIsLoading(false); // Hide loading indicator
-      return JSON.stringify(data.data);
+      setIsLoading(false);
+      return JSON.stringify(data.data); // Process success response
     } catch (error) {
-      debugger;
       console.error("Error fetching campaigns:", error);
       setIsLoading(false);
-      addMessageToChat({type: 'error', text: 'Error fetching campaign information'});
+
+      const errorMessage = `Encountered an error while fetching data from the Facebook API: ${error}. How should I adjust the fields or endpoint to successfully fetch the data?`;
+      await sendErrorToOpenAI(errorMessage);
     }
   };
+
+  const sendErrorToOpenAI = async (errorMessage) => {
+    conversationHistory.push({
+      role: "system",
+      content: "Adjust fields or endpoints based on the Facebook API error encountered."
+    }, {
+      role: "user",
+      content: errorMessage
+    });
 
   const interpretateResults = async (campaignData = '') => {
     if (!campaignData.trim()) return;
 
     setIsLoading(true);
 
-    // Assuming `campaignData` is a string representation of the fetched campaigns
-    // Adjust the question to fit your needs for analysis
     const analysisQuestion = `Based on the following campaign data: "${campaignData}", and considering the user's initial question: "${question}", how can we interpret this information? Don't answer long, but be nice.`;
 
     const messagesPayload = [
@@ -227,6 +235,26 @@ function ChatBot() {
       addMessageToChat({type: 'error', text: 'Error interpreting campaign information'});
     }
   };
+
+  // Assuming this function is called after receiving an error from Facebook API
+  async function handleFacebookApiError(errorResponse, originalQuestion) {
+    // Extract error information
+    const errorCode = errorResponse.error.code;
+    const errorMessage = errorResponse.error.message;
+
+    // Formulate a question for OpenAI
+    const openAIQuestion = `I received an error when querying the Facebook API with the following details: Error Code ${errorCode}, Error Message: ${errorMessage}. Based on this, how should I update my fields or endpoint for the following question: "${originalQuestion}"?`;
+
+    try {
+      const openAIResponse = await sendQuestionToOpenAI(openAIQuestion);
+      const suggestion = openAIResponse.choices[0].text;
+
+      console.log("Suggestion from OpenAI:", suggestion);
+
+    } catch (error) {
+      console.error("Error consulting OpenAI:", error);
+    }
+  }
 
   const handleSendClick = async () => {
     const {suggestedFields, endpoint} = await sendMessageToOpenAI();
