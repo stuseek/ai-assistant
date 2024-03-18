@@ -145,54 +145,49 @@ function ChatBot() {
     }
   };
 
-  const fetchCampaigns = async (suggestedFields, endpoint) => {
+  const fetchCampaigns = async (suggestedFields, endpoint, retry = false) => {
     const accessToken = authToken;
     const adAccountId = '1785133881702528';
     const baseUrl = `https://graph.facebook.com/v19.0/act_${adAccountId}/${endpoint}`;
     const url = `${baseUrl}?fields=${suggestedFields}&access_token=${accessToken}`;
 
-    setIsLoading(true); // Use the existing isLoading state to show loading indicator
+    setIsLoading(true);
 
     try {
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error(`Facebook API responded with status: ${response.status}`);
+        throw new Error(`Network response was not ok. Status: ${response.status}`);
       }
       const data = await response.json();
       setIsLoading(false);
       return JSON.stringify(data.data);
     } catch (error) {
-      debugger;
       console.error("Error fetching campaigns:", error);
       setIsLoading(false);
-      processApiError(error.toString()); // Process the error with ChatGPT
+
+      if (!retry) {
+        // If this isn't a retry attempt, process the error and potentially retry
+        processApiError(error, suggestedFields, endpoint);
+      } else {
+        // If this is already a retry, display the error in the chat
+        addMessageToChat({type: 'error', text: 'Error fetching campaign information after retrying with new parameters'});
+      }
     }
   };
 
-  const processApiError = async (errorMessage) => {
-    // Format your message or question to send to ChatGPT based on the error
-    const questionToChatGPT = `I encountered an error while trying to fetch data from the Facebook API: "${errorMessage}". Can you provide advice on how to resolve this issue?`;
+  const processApiError = async (error, fields, endpoint) => {
+    const { newFields, newEndpoint } = await getNewParametersFromChatGPT(error, fields, endpoint);
 
-    // You might need to adjust the message format based on your application's design
-    // This is just a simple example
-    const chatGPTMessage = {
-      role: "user",
-      content: questionToChatGPT
-    };
+    if (newFields && newEndpoint) {
+      await fetchCampaigns(newFields, newEndpoint, true);
+    } else {
+      addMessageToChat({type: 'error', text: 'Unable to process the error with new parameters'});
+    }
+  };
 
-    // Add the error message to your chat UI or log, as appropriate
-    addMessageToChat({type: 'error', text: errorMessage});
-
-    // Here, you would call the same API or a similar function that sends messages to ChatGPT
-    // This example assumes you have a function similar to sendMessageToOpenAI() that can handle this
-    // Adjust the function call as necessary to fit your application's architecture
-    sendMessageToOpenAI(chatGPTMessage).then(response => {
-      // Handle the response from ChatGPT about the error
-      // For example, display advice or steps to resolve the issue in your UI
-      console.log(response); // Or update the UI accordingly
-    }).catch(error => {
-      console.error('Error processing API error with ChatGPT:', error);
-    });
+// Placeholder for the new function that communicates with ChatGPT to get new parameters based on the error
+  const getNewParametersFromChatGPT = async (error, fields, endpoint) => {
+    return { newFields: 'new_field_list', newEndpoint: 'new_endpoint' };
   };
 
   const interpretateResults = async (campaignData = '') => {
