@@ -181,7 +181,7 @@ function ChatBot() {
     if (newFields && newEndpoint) {
       await fetchCampaigns(newFields, newEndpoint, true);
     } else {
-      addMessageToChat({type: 'error', text: 'Unable to process the error with new parameters'});
+      addMessageToChat({type: 'error', text: 'Unable to process the error with new parameters. Retry...'});
     }
   };
 
