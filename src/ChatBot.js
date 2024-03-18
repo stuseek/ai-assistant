@@ -178,6 +178,7 @@ function ChatBot() {
       role: "user",
       content: errorMessage
     });
+  }
 
   const interpretateResults = async (campaignData = '') => {
     if (!campaignData.trim()) return;
