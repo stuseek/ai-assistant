@@ -162,6 +162,7 @@ function ChatBot() {
       setIsLoading(false);
       return JSON.stringify(data.data);
     } catch (error) {
+      debugger;
       console.error("Error fetching campaigns:", error);
       setIsLoading(false);
       processApiError(error.toString()); // Process the error with ChatGPT
