@@ -91,7 +91,7 @@ function ChatBot() {
       addSystemMessageToConversation(`Retry due to error: ${errorMessage}`);
     }
 
-    const openAIQuestion = `Based on the customer request: "${question}", and message history, what endpoint and fields should we fetch from the Facebook Ads API? Always add name to the top-level fields. Only use real fields from Meta Business API. Respond in JSON with such fields (example): endpoint: endpoint, fields: field1,field2,field3.fields(field1,field2,field3{subfield1,subfield2}). Do not add anything else, just return stringified json. Should be compatible with graphQL syntax. Do not add markdown.`;
+    const openAIQuestion = `Based on the customer request: "${question}", and message history, what endpoint and fields should we fetch from the Facebook Ads API? Always add name to the top-level fields. Only use real fields from Meta Business API. Respond in JSON with such fields, example: endpoint: endpoint, fields: field1,field2,field3.fields(field1,field2,field3{subfield1,subfield2}). Do not add anything else, just return stringified json. Should be compatible with graphQL syntax. Do not add markdown.`;
 
     const messagesPayload = [
       {
@@ -254,6 +254,7 @@ function ChatBot() {
 
   const handleSendClick = async () => {
     const {suggestedFields, endpoint} = await sendMessageToOpenAI();
+    debugger;
     const campaignInfo = await fetchCampaigns(suggestedFields, endpoint);
     await interpretateResults(campaignInfo);
     setQuestion('');
