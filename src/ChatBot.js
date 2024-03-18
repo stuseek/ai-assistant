@@ -82,10 +82,14 @@ function ChatBot() {
     ]);
   };
 
-  const sendMessageToOpenAI = async () => {
+  const sendMessageToOpenAI = async (isRetry = false, errorMessage = '') => {
     if (!question.trim()) return;
 
     setIsLoading(true);
+
+    if (isRetry) {
+      addSystemMessageToConversation(`Retry due to error: ${errorMessage}`);
+    }
 
     const openAIQuestion = `Based on the customer request: "${question}", and message history, what endpoint and fields should we fetch from the Facebook Ads API? Always add name to the top-level fields. Only use real fields from Meta Business API. Respond in JSON with such fields (example): endpoint: endpoint, fields: field1,field2,field3.fields(field1,field2,field3{subfield1,subfield2}). Do not add anything else, just return stringified json. Should be compatible with graphQL syntax. Do not add markdown.`;
 
@@ -145,7 +149,7 @@ function ChatBot() {
     }
   };
 
-  const fetchCampaigns = async (suggestedFields, endpoint, retry = false) => {
+  const fetchCampaigns = async (suggestedFields, endpoint) => {
     const accessToken = authToken;
     const adAccountId = '1785133881702528';
     const baseUrl = `https://graph.facebook.com/v19.0/act_${adAccountId}/${endpoint}`;
@@ -156,7 +160,20 @@ function ChatBot() {
     try {
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error(`Network response was not ok. Status: ${response.status}`);
+        const errorBody = await response.json(); // Attempt to read the error body
+        let errorMessage = "Error fetching data from Facebook API.";
+        if (errorBody && errorBody.error && errorBody.error.message) {
+          errorMessage = errorBody.error.message; // Extract a more specific error message if available
+        }
+        if (response.status === 400) {
+          // Include the specific error message in the system message
+          addSystemMessageToConversation(`You were wrong, try again. Use the same format. Error: ${errorMessage}`);
+          // Retry the request by making a recursive call to the original chat function
+          await sendMessageToOpenAI(true, errorMessage); // Pass the error message for context
+        } else {
+          // Handle other types of errors
+          throw new Error(errorMessage);
+        }
       }
       const data = await response.json();
       setIsLoading(false);
@@ -164,32 +181,18 @@ function ChatBot() {
     } catch (error) {
       console.error("Error fetching campaigns:", error);
       setIsLoading(false);
-
-      if (!retry) {
-        // If this isn't a retry attempt, process the error and potentially retry
-        processApiError(error, suggestedFields, endpoint);
-      } else {
-        // If this is already a retry, display the error in the chat
-        addMessageToChat({type: 'error', text: 'Error fetching campaign information after retrying with new parameters'});
-      }
+      addMessageToChat({type: 'error', text: 'Error fetching campaign information'});
     }
   };
 
-  const processApiError = async (error, fields, endpoint) => {
-    const { newFields, newEndpoint } = await getNewParametersFromChatGPT(error, fields, endpoint);
 
-    if (newFields && newEndpoint) {
-      await fetchCampaigns(newFields, newEndpoint, true);
-    } else {
-      addMessageToChat({type: 'error', text: 'Unable to process the error with new parameters. Retry...'});
-    }
+// Function to add a system message to the conversation history
+  const addSystemMessageToConversation = (message) => {
+    conversationHistory.push({
+      role: "system",
+      content: message
+    });
   };
-
-// Placeholder for the new function that communicates with ChatGPT to get new parameters based on the error
-  const getNewParametersFromChatGPT = async (error, fields, endpoint) => {
-    return { newFields: 'new_field_list', newEndpoint: 'new_endpoint' };
-  };
-
   const interpretateResults = async (campaignData = '') => {
     if (!campaignData.trim()) return;
 
