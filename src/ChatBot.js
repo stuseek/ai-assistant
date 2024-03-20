@@ -114,6 +114,10 @@ function ChatBot() {
         },
         {
           "role": "system",
+          "content": "Allowed fields for 'insights' endpoint: account_currency,account_id,account_name,action_values,actions,ad_name,clicks,cpc,cpm,cpp,ctr,date_start,date_stop,dda_results,adset_name,ad_id,adset_id,campaign_name,frequency,impressions,inline_link_click_ctr,inline_link_clicks,inline_post_engagement,objective,video_30_sec_watched_actions,video_avg_time_watched_actions,video_p100_watched_actions,video_p25_watched_actions,video_p50_watched_actions,video_p75_watched_actions,video_p95_watched_actions,video_play_actions,website_purchase_roas,full_view_reach,full_view_impressions,cost_per_action_type,cost_per_conversion,conversion_values,campaign_id,conversions"
+        },
+        {
+          "role": "system",
           "content": "Allowed fields for 'adsets' endpoint: account_id,bid_strategy,adlabels,adset_schedule,asset_feed_id,attribution_spec,bid_adjustments,bid_amount,bid_constraints,bid_info,billing_event,budget_remaining,campaign,campaign_active_time,campaign_attribution,campaign_id,name,status,start_time,source_adset,targeting,targeting_optimization_types,ads{insights},insights{cpm},id,daily_budget,created_time,end_time,effective_status,lifetime_budget,lifetime_min_spend_target,lifetime_spend_cap,optimization_goal,pacing_type,adcreatives,copies,configured_status,is_dynamic_creative,recommendations,updated_time,budget_schedules"
         },
         {
