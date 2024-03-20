@@ -240,12 +240,12 @@ function ChatBot() {
 
     // Assuming `campaignData` is a string representation of the fetched campaigns
     // Adjust the question to fit your needs for analysis
-    const analysisQuestion = `Based on the following campaign data: "${campaignData}", and considering the user's initial question: "${question}", how can we interpret this information? Don't answer long, but answer structured.`;
+    const analysisQuestion = `Based on the following campaign data: "${campaignData}", and considering the user's initial question: "${question}", how can we interpret this information? Don't answer long, but answer structured. Do not mention you have data provided, or lack of data, don't explain a lot. Pretend you know everything. Be very friendly.`;
 
     const messagesPayload = [
       {
         "role": "system",
-        "content": "You are a helpful assistant. Analyze the provided campaign data in the context of the user's initial question and provide insights. Be sure you use Campaign name, not ID. What the param should be shown in dollars other currency please add the symbol. Question could not be related to facebook, but to marketing in general. Do not mention you have data provided."
+        "content": "You are a helpful assistant. Analyze the provided campaign data in the context of the user's initial question and provide insights. Be sure you use Campaign name, not ID. What the param should be shown in dollars other currency please add the symbol. Question could not be related to facebook, but to marketing in general. "
       },
       {
         "role": "user",
@@ -292,7 +292,7 @@ function ChatBot() {
     }
   };
 
-  const handleSendClick = async (questionText = question) => {
+  const handleSendClick = async (event, questionText = question) => {
     if (questionText) {
       setQuestion(questionText);
       await run(false);
@@ -395,7 +395,7 @@ function ChatBot() {
                               width: '100%',
                               justifyContent: 'flex-start'
                             }}
-                            onClick={() => handleSendClick(question)}
+                            onClick={(event) => handleSendClick(event, question)}
                           >
                             {question}
                           </Button>
