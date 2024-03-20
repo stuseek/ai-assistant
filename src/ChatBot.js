@@ -378,30 +378,30 @@ function ChatBot() {
                     height: '100%',
                     p: 3
                   }}>
-                    <Typography variant="subtitle2" color="textSecondary">
-                      You can ask me:
-                    </Typography>
+                    {/*<Typography variant="subtitle2" color="textSecondary">*/}
+                    {/*  You can ask me:*/}
+                    {/*</Typography>*/}
                     <br/><br/>
-                    <Grid container spacing={2} sx={{ marginBottom: 2 }}>
-                      {exampleQuestions.map((question, index) => (
-                        <Grid item xs={6} key={index}>
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            sx={{
-                              fontSize: '0.75rem',
-                              borderRadius: '10px',
-                              textTransform: 'none',
-                              width: '100%',
-                              justifyContent: 'flex-start'
-                            }}
-                            onClick={(event) => handleSendClick(event, question)}
-                          >
-                            {question}
-                          </Button>
-                        </Grid>
-                      ))}
-                    </Grid>
+                    {/*<Grid container spacing={2} sx={{ marginBottom: 2 }}>*/}
+                    {/*  {exampleQuestions.map((question, index) => (*/}
+                    {/*    <Grid item xs={6} key={index}>*/}
+                    {/*      <Button*/}
+                    {/*        variant="outlined"*/}
+                    {/*        size="small"*/}
+                    {/*        sx={{*/}
+                    {/*          fontSize: '0.75rem',*/}
+                    {/*          borderRadius: '10px',*/}
+                    {/*          textTransform: 'none',*/}
+                    {/*          width: '100%',*/}
+                    {/*          justifyContent: 'flex-start'*/}
+                    {/*        }}*/}
+                    {/*        onClick={(event) => handleSendClick(event, question)}*/}
+                    {/*      >*/}
+                    {/*        {question}*/}
+                    {/*      </Button>*/}
+                    {/*    </Grid>*/}
+                    {/*  ))}*/}
+                    {/*</Grid>*/}
                     <br/><br/>
                     <ChatIcon color="disabled" sx={{fontSize: 60}}/>
                     <Typography variant="subtitle1" color="textSecondary">
