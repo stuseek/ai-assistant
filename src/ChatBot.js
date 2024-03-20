@@ -349,27 +349,6 @@ function ChatBot() {
               </Box>
             </Drawer>
 
-            <Dialog open={isSettingsOpen} onClose={toggleSettings}>
-              <DialogTitle>Campaign Data</DialogTitle>
-              <DialogContent>
-                <TextField sx={{width: 800}}
-                           label="CSV with campaign data"
-                           variant="outlined"
-                           fullWidth
-                           multiline
-                           rows={20}
-                           value={additionalInfo}
-                           onChange={handleAdditionalInfoChange}
-                           margin="dense"
-                />
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={toggleSettings} color="primary">
-                  Close
-                </Button>
-              </DialogActions>
-            </Dialog>
-
             <Box sx={{my: 4}}>
               <Paper sx={{mt: 5, maxHeight: 550, overflow: 'auto'}}>
                 {chat.length > 0 ? (
