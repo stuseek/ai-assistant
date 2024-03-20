@@ -3,7 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import {
   Container, TextField, Button, Box, List, ListItem, ListItemText, Paper,
   AppBar, Toolbar, IconButton, Drawer, Typography, Dialog, DialogTitle,
-  DialogContent, DialogActions
+  DialogContent, DialogActions, Grid
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -21,8 +21,16 @@ function ChatBot() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authToken, setAuthToken] = useState(false);
   const [gptVersion, setGptVersion] = useState('gpt-4-turbo-preview');
+  const [isFirstCall, setIsFirstCall] = useState(true);
+
 
   let conversationHistory = [];
+  const exampleQuestions = [
+    "How many impressions in the last month?",
+    "How many campaigns are currently active?",
+    "What is the total spend so far this week?",
+    "What audience is driving the most purchases?"
+  ];
 
   const checkLoginStatus = () => {
     window.FB.getLoginStatus(function (response) {
@@ -87,24 +95,45 @@ function ChatBot() {
 
     setIsLoading(true);
 
-    if (isRetry) {
-      addSystemMessageToConversation(`Retry due to error: ${errorMessage}`);
+    const openAIQuestion = `Based on the customer request: "${question}", and message history, what endpoint and fields should we fetch from the Facebook Ads API? Always add name to the top-level fields. Only use real fields from Meta Business API. Respond in JSON with such fields, example: endpoint: endpoint, fields: field1,field2,field3.fields(field1,field2,field3{subfield1,subfield2}). Do not add anything else, just return stringified json. Should be compatible with provided graphQL syntax. Do not add markdown.`;
+
+    let messagesPayload;
+    // if (isFirstCall) {
+      messagesPayload = [
+        {
+          "role": "system",
+          "content": "You are a helpful assistant. Analyze the customer request and suggest the endpoint and fields needed for a Facebook Ads API request. Use API Be sure to select fields allowed for endpoint you selected."
+        },
+        {
+          "role": "system",
+          "content": "Allowed endpoint values to return: 'campaigns', 'ads', 'adimages', 'adsets', 'customaudiences', 'advideos', 'insights'. Just one word, nothing else."
+        },
+        {
+          "role": "system",
+          "content": "Allowed fields for 'campaigns' endpoint: account_id,adlabels,bid_strategy,boosted_object_id,brand_lift_studies,name,spend_cap,start_time,stop_time,status,id,ads{insights},adsets,insights{cost_per_conversion},budget_remaining,buying_type,lifetime_budget,objective,pacing_type,last_budget_toggling_time"
+        },
+        {
+          "role": "system",
+          "content": "Allowed fields for 'adsets' endpoint: account_id,bid_strategy,adlabels,adset_schedule,asset_feed_id,attribution_spec,bid_adjustments,bid_amount,bid_constraints,bid_info,billing_event,budget_remaining,campaign,campaign_active_time,campaign_attribution,campaign_id,name,status,start_time,source_adset,targeting,targeting_optimization_types,ads{insights},insights{cpm},id,daily_budget,created_time,end_time,effective_status,lifetime_budget,lifetime_min_spend_target,lifetime_spend_cap,optimization_goal,pacing_type,adcreatives,copies,configured_status,is_dynamic_creative,recommendations,updated_time,budget_schedules"
+        },
+        {
+          "role": "user",
+          "content": openAIQuestion
+        }
+      ];
+      setIsFirstCall(false);
+    // } else {
+    //   messagesPayload = [
+    //     {
+    //       "role": "user",
+    //       "content": openAIQuestion
+    //     }
+    //   ];
+    // }
+
+    if (!isRetry) {
+      addMessageToChat({type: 'sent', text: question});
     }
-
-    const openAIQuestion = `Based on the customer request: "${question}", and message history, what endpoint and fields should we fetch from the Facebook Ads API? Always add name to the top-level fields. Only use real fields from Meta Business API. Respond in JSON with such fields, example: endpoint: endpoint, fields: field1,field2,field3.fields(field1,field2,field3{subfield1,subfield2}). Do not add anything else, just return stringified json. Should be compatible with graphQL syntax. Do not add markdown.`;
-
-    const messagesPayload = [
-      {
-        "role": "system",
-        "content": "You are a helpful assistant. Analyze the customer request and suggest the endpoint and fields needed for a Facebook Ads API request. Be sure to select fields allowed for endpoint you selected. Allowed endpoints: campaigns, ads, adimages, adsets, customaudiences. Allowed fields to fetch, graphql-based: account_id,adlabels,bid_strategy,boosted_object_id,brand_lift_studies,budget_rebalance_flag,budget_remaining,buying_type,campaign_group_active_time,can_create_brand_lift_study,can_use_spend_cap,configured_status,created_time,daily_budget,effective_status,has_secondary_skadnetwork_reporting,id,is_budget_schedule_enabled,is_skadnetwork_attribution,issues_info,last_budget_toggling_time,lifetime_budget,name,objective,pacing_type,primary_attribution,smart_promotion_type,source_campaign,promoted_object,source_campaign_id,special_ad_categories,special_ad_category,special_ad_category_country,spend_cap,start_time,status,stop_time,topline_id,updated_time,ad_studies,adrules_governed,ads,adsets,budget_schedules,copies,insights{account_currency,account_id,action_values,account_name,ad_id,ad_name,adset_id,adset_name,app_id,attribution_setting,buying_type,campaign_id,campaign_name,canvas_avg_view_percent,canvas_avg_view_time,catalog_segment_value,clicks,coarse_conversion_value,conversion_rate_ranking,conversion_values,conversions,converted_product_quantity,converted_product_value,cost_per_action_type,cost_per_conversion,actions,cost_per_estimated_ad_recallers,cost_per_inline_link_click,cost_per_inline_post_engagement,cost_per_outbound_click,cost_per_thruplay,cost_per_unique_action_type,cost_per_unique_click,cost_per_unique_inline_link_click,cost_per_unique_outbound_click,cpc,cpm,cpp,ctr,date_start,date_stop,dda_results,engagement_rate_ranking,estimated_ad_recall_rate,estimated_ad_recallers,fidelity_type,frequency,full_view_impressions,full_view_reach,hsid,impressions,inline_link_click_ctr,inline_link_clicks,inline_post_engagement,instagram_upcoming_event_reminders_set,instant_experience_clicks_to_open,instant_experience_clicks_to_start,instant_experience_outbound_clicks,is_conversion_id_modeled,landing_destination,mobile_app_purchase_roas,objective,optimization_goal,outbound_clicks,outbound_clicks_ctr,place_page_name,postback_sequence_index,purchase_roas,qualifying_question_qualify_answer_rate,quality_ranking,reach,redownload,skan_campaign_id,skan_conversion_id,social_spend,spend,total_postbacks,total_postbacks_detailed,total_postbacks_detailed_v4,user_segment_key,video_30_sec_watched_actions,video_avg_time_watched_actions,video_p100_watched_actions,video_p25_watched_actions,video_p50_watched_actions,video_p75_watched_actions,video_p95_watched_actions,video_play_actions,video_play_curve_actions,website_ctr,website_purchase_roas}"
-      },
-      {
-        "role": "user",
-        "content": openAIQuestion
-      }
-    ];
-
-    addMessageToChat({ type: 'sent', text: question });
 
     messagesPayload.forEach((message) => {
       conversationHistory.push(message);
@@ -113,7 +142,7 @@ function ChatBot() {
     const data = {
       model: gptVersion,
       messages: conversationHistory,
-      response_format: { "type": "json_object" }
+      response_format: {"type": "json_object"}
     };
 
     try {
@@ -169,20 +198,27 @@ function ChatBot() {
           // Include the specific error message in the system message
           addSystemMessageToConversation(`You were wrong, try again. Use the same format. Error: ${errorMessage}`);
           // Retry the request by making a recursive call to the original chat function
-          await sendMessageToOpenAI(true, errorMessage); // Pass the error message for context
+          await run(true, errorMessage);
+          setIsLoading(false);
         } else {
           // Handle other types of errors
           throw new Error(errorMessage);
         }
       }
       const data = await response.json();
-      setIsLoading(false);
       return JSON.stringify(data.data);
     } catch (error) {
       console.error("Error fetching campaigns:", error);
       setIsLoading(false);
-      addMessageToChat({type: 'error', text: 'Error fetching campaign information'});
+      // addMessageToChat({type: 'error', text: 'Error fetching campaign information'});
     }
+  };
+
+  const run = async (isRetry = false, errorMessage = '') => {
+    const {suggestedFields, endpoint} = await sendMessageToOpenAI(isRetry);
+    const campaignInfo = await fetchCampaigns(suggestedFields, endpoint);
+    await interpretateResults(campaignInfo);
+    setQuestion('');
   };
 
 
@@ -205,7 +241,7 @@ function ChatBot() {
     const messagesPayload = [
       {
         "role": "system",
-        "content": "You are a helpful assistant. Analyze the provided campaign data in the context of the user's initial question and provide insights. Be sure you use Campaign name, not ID. What the param should be shown in dollars other currency please add the symbol. If you don't have enough information to answer, just answer something general. Question could not be related to facebook, but to marketing in general. Do not mention you have data provided."
+        "content": "You are a helpful assistant. Analyze the provided campaign data in the context of the user's initial question and provide insights. Be sure you use Campaign name, not ID. What the param should be shown in dollars other currency please add the symbol. Question could not be related to facebook, but to marketing in general. Do not mention you have data provided."
       },
       {
         "role": "user",
@@ -252,12 +288,11 @@ function ChatBot() {
     }
   };
 
-  const handleSendClick = async () => {
-    const {suggestedFields, endpoint} = await sendMessageToOpenAI();
-    debugger;
-    const campaignInfo = await fetchCampaigns(suggestedFields, endpoint);
-    await interpretateResults(campaignInfo);
-    setQuestion('');
+  const handleSendClick = async (questionText = question) => {
+    if (questionText) {
+      setQuestion(questionText);
+      await run(false);
+    }
   };
 
   return (
@@ -360,6 +395,31 @@ function ChatBot() {
                     height: '100%',
                     p: 3
                   }}>
+                    <Typography variant="subtitle2" color="textSecondary">
+                      You can ask me:
+                    </Typography>
+                    <br/><br/>
+                    <Grid container spacing={2} sx={{ marginBottom: 2 }}>
+                      {exampleQuestions.map((question, index) => (
+                        <Grid item xs={6} key={index}>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            sx={{
+                              fontSize: '0.75rem',
+                              borderRadius: '10px',
+                              textTransform: 'none',
+                              width: '100%',
+                              justifyContent: 'flex-start'
+                            }}
+                            onClick={() => handleSendClick(question)}
+                          >
+                            {question}
+                          </Button>
+                        </Grid>
+                      ))}
+                    </Grid>
+                    <br/><br/>
                     <ChatIcon color="disabled" sx={{fontSize: 60}}/>
                     <Typography variant="subtitle1" color="textSecondary">
                       No messages yet. Start the conversation!
