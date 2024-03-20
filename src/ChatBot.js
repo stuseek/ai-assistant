@@ -102,7 +102,7 @@ function ChatBot() {
       messagesPayload = [
         {
           "role": "system",
-          "content": "You are a helpful assistant. Analyze the customer request and suggest the endpoint and fields needed for a Facebook Ads API request. Use API Be sure to select fields allowed for endpoint you selected."
+          "content": "You are a helpful assistant. Analyze the customer request and suggest the endpoint and fields needed for a Facebook Ads API request. Use API Be sure to select fields allowed for endpoint you selected. Be friendly, but not expose a lot of data and explanations."
         },
         {
           "role": "system",
