@@ -91,7 +91,7 @@ function ChatBot() {
   };
 
   const sendMessageToOpenAI = async (isRetry = false, errorMessage = '') => {
-    if (!question.trim()) return;
+    // if (!question.trim()) return;
 
     setIsLoading(true);
 
@@ -231,15 +231,14 @@ function ChatBot() {
   };
 
   const run = async (isRetry = false, errorMessage = '') => {
+    if (!question.trim()) return;
     const {suggestedFields, endpoint} = await sendMessageToOpenAI(isRetry);
-    console.log('Fields fetched!');
     const campaignInfo = await fetchCampaigns(suggestedFields, endpoint);
     await interpretateResults(campaignInfo);
     setQuestion('');
   };
 
 
-// Function to add a system message to the conversation history
   const addSystemMessageToConversation = (message) => {
     conversationHistory.push({
       role: "system",
@@ -433,7 +432,7 @@ function ChatBot() {
                   margin="normal"
                   onKeyPress={(ev) => {
                     if (ev.key === 'Enter') {
-                      sendMessageToOpenAI();
+                      handleSendClick();
                     }
                   }}
                   sx={{mr: 1, height: '40px', my: 0}}
