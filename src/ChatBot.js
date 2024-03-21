@@ -118,7 +118,19 @@ function ChatBot() {
         },
         {
           "role": "system",
+          "content": "Allowed fields for 'customaudiences' endpoint: lookalike_audience_ids,name,lookalike_spec,operation_status,ads,data_source,account_id,approximate_count_lower_bound,approximate_count_upper_bound,time_created,sharing_status,sessions,description,id,delivery_status,external_event_source,opt_out_link,adaccounts"
+        },
+        {
+          "role": "system",
           "content": "Allowed fields for 'adsets' endpoint: account_id,bid_strategy,adlabels,adset_schedule,asset_feed_id,attribution_spec,bid_adjustments,bid_amount,bid_constraints,bid_info,billing_event,budget_remaining,campaign,campaign_active_time,campaign_attribution,campaign_id,name,status,start_time,source_adset,targeting,targeting_optimization_types,ads{insights},insights{cpm},id,daily_budget,created_time,end_time,effective_status,lifetime_budget,lifetime_min_spend_target,lifetime_spend_cap,optimization_goal,pacing_type,adcreatives,copies,configured_status,is_dynamic_creative,recommendations,updated_time,budget_schedules"
+        },
+        {
+          "role": "system",
+          "content": "Allowed fields for 'advideos' endpoint: id,status,video_insights,source,length,live_status,post_views,post_id,published,title,is_crosspost_video,custom_labels,content_category,views"
+        },
+        {
+          "role": "system",
+          "content": "Allowed fields for 'adimages' endpoint: account_id,updated_time,status,id,creatives,created_time,is_associated_creatives_in_adgroups,name,url"
         },
         {
           "role": "user",
@@ -220,6 +232,7 @@ function ChatBot() {
 
   const run = async (isRetry = false, errorMessage = '') => {
     const {suggestedFields, endpoint} = await sendMessageToOpenAI(isRetry);
+    console.log('Fields fetched!');
     const campaignInfo = await fetchCampaigns(suggestedFields, endpoint);
     await interpretateResults(campaignInfo);
     setQuestion('');
@@ -245,7 +258,7 @@ function ChatBot() {
     const messagesPayload = [
       {
         "role": "system",
-        "content": "You are a helpful assistant. Analyze the provided campaign data in the context of the user's initial question and provide insights. Be sure you use Campaign name, not ID. What the param should be shown in dollars other currency please add the symbol. Question could not be related to facebook, but to marketing in general. "
+        "content": "You are a helpful assistant. Analyze the provided campaign data in the context of the user's initial question and provide insights. Be sure you use Campaign name, not ID. What the param should be shown in dollars other currency please add the symbol. Question could not be related to facebook, but to marketing in general. If there is a link, or url present, format it as a link"
       },
       {
         "role": "user",
