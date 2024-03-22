@@ -95,7 +95,7 @@ function ChatBot() {
 
     setIsLoading(true);
 
-    const openAIQuestion = `Based on the customer request: "${question}", and message history, what endpoint and fields should we fetch from the Facebook Ads API? Always add name to the top-level fields. Only use real fields from Meta Business API. Respond in JSON with such fields, example: endpoint: endpoint, fields: field1,field2,field3.fields(field1,field2,field3{subfield1,subfield2}). Do not add anything else, just return stringified json. Should be compatible with provided graphQL syntax. Do not add markdown.`;
+    const openAIQuestion = `Based on the customer request: "${question}", and message history, what endpoint and fields should we fetch from the Facebook Ads API? Always add name to the top-level fields. Only use real fields from Meta Business API. Respond in JSON with such fields, example: endpoint: endpoint, fields: field1,field2,field3.fields(field1,field2,field3{subfield1,subfield2}). Try to select as much fields as possible to get better results. Do not add anything else, just return stringified json. Should be compatible with provided graphQL syntax. Do not add markdown.`;
 
     let messagesPayload;
     // if (isFirstCall) {
@@ -252,7 +252,7 @@ function ChatBot() {
 
     // Assuming `campaignData` is a string representation of the fetched campaigns
     // Adjust the question to fit your needs for analysis
-    const analysisQuestion = `Based on the following campaign data: "${campaignData}", and considering the user's initial question: "${question}", how can we interpret this information? Don't answer long, but answer structured. Do not mention you have data provided, or lack of data, don't explain a lot. Pretend you know everything. Be very friendly.`;
+    const analysisQuestion = `Based on the following campaign data: "${campaignData}", and considering the user's initial question: "${question}", how can we interpret this information? Don't answer long, but answer structured. Do not mention you have data provided, or lack of data, don't explain a lot. Pretend you know everything. Be very friendly. Try to limit output by 250 tokens, of possible.`;
 
     const messagesPayload = [
       {
