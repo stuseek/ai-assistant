@@ -2,13 +2,14 @@ import React, {useEffect, useState} from 'react';
 import ReactMarkdown from 'react-markdown';
 import {
   Container, TextField, Button, Box, List, ListItem, ListItemText, Paper,
-  AppBar, Toolbar, IconButton, Drawer, Typography, Dialog, DialogTitle,
-  DialogContent, DialogActions, Grid
+  AppBar, Toolbar, IconButton, Drawer, Typography, Grid
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import SettingsIcon from '@mui/icons-material/Settings';
 import {CircularProgress} from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
+
+let conversationHistory = [];
 
 function ChatBot() {
   const [apiKey, setApiKey] = useState('');
@@ -22,13 +23,13 @@ function ChatBot() {
   const [authToken, setAuthToken] = useState(false);
   const [gptVersion, setGptVersion] = useState('gpt-4-turbo-preview');
   const [isFirstCall, setIsFirstCall] = useState(true);
+  const [shouldRun, setShouldRun] = useState(false);
 
 
-  let conversationHistory = [];
   const exampleQuestions = [
     "How many impressions in the last month?",
     "How many campaigns are currently active?",
-    "What is the total spend so far this week?",
+    "Which ad drove the most purchases?",
     "What audience is driving the most purchases?"
   ];
 
@@ -37,6 +38,18 @@ function ChatBot() {
       console.log(response)
     });
   }
+
+  useEffect(() => {
+    const executeRun = async () => {
+      if (shouldRun && question) {
+        await run(false, question); // Ensure `run` is adapted to use `question` directly
+        setShouldRun(false); // Reset the trigger
+      }
+    };
+
+    executeRun();
+  }, [shouldRun, question]); // Depend on `shouldRun` and `question`
+
 
   useEffect(() => {
     window.FB.getLoginStatus(function (response) {
@@ -75,10 +88,6 @@ function ChatBot() {
     setQuestion(event.target.value);
   };
 
-  const handleAdditionalInfoChange = (event) => {
-    setAdditionalInfo(event.target.value);
-  };
-
   const addMessageToChat = (message) => {
     setChat((prevChat) => [
       ...prevChat,
@@ -98,7 +107,7 @@ function ChatBot() {
     const openAIQuestion = `Based on the customer request: "${question}", and message history, what endpoint and fields should we fetch from the Facebook Ads API? Always add name to the top-level fields. Only use real fields from Meta Business API. Respond in JSON with such fields, example: endpoint: endpoint, fields: field1,field2,field3.fields(field1,field2,field3{subfield1,subfield2}). Try to select as much fields as possible to get better results. Do not add anything else, just return stringified json. Should be compatible with provided graphQL syntax. Do not add markdown.`;
 
     let messagesPayload;
-    // if (isFirstCall) {
+    if (isFirstCall) {
       messagesPayload = [
         {
           "role": "system",
@@ -138,14 +147,14 @@ function ChatBot() {
         }
       ];
       setIsFirstCall(false);
-    // } else {
-    //   messagesPayload = [
-    //     {
-    //       "role": "user",
-    //       "content": openAIQuestion
-    //     }
-    //   ];
-    // }
+    } else {
+      messagesPayload = [
+        {
+          "role": "user",
+          "content": openAIQuestion
+        }
+      ];
+    }
 
     if (!isRetry) {
       addMessageToChat({type: 'sent', text: question});
@@ -304,10 +313,10 @@ function ChatBot() {
     }
   };
 
-  const handleSendClick = async (event, questionText = question) => {
+  const handleSendClick = (event, questionText = question) => {
     if (questionText) {
-      setQuestion(questionText);
-      await run(false);
+      setQuestion(questionText); // Update question state
+      setShouldRun(true); // Set the trigger for the effect
     }
   };
 
@@ -369,7 +378,7 @@ function ChatBot() {
                       <React.Fragment key={index}>
                         <ListItem alignItems="flex-start">
                           <ListItemText
-                            primary={chatMessage.type === 'sent' ? 'You' : chatMessage.role === 'Assistant'}
+                            primary={chatMessage.type === 'sent' ? 'You' : 'Assistant'}
                             secondary={<ReactMarkdown>{chatMessage.text}</ReactMarkdown>}
                             primaryTypographyProps={{
                               color: chatMessage.type === 'sent' ? 'primary' : 'textSecondary',
@@ -390,30 +399,30 @@ function ChatBot() {
                     height: '100%',
                     p: 3
                   }}>
-                    {/*<Typography variant="subtitle2" color="textSecondary">*/}
-                    {/*  You can ask me:*/}
-                    {/*</Typography>*/}
+                    <Typography variant="subtitle2" color="textSecondary">
+                      You can ask me:
+                    </Typography>
                     <br/><br/>
-                    {/*<Grid container spacing={2} sx={{ marginBottom: 2 }}>*/}
-                    {/*  {exampleQuestions.map((question, index) => (*/}
-                    {/*    <Grid item xs={6} key={index}>*/}
-                    {/*      <Button*/}
-                    {/*        variant="outlined"*/}
-                    {/*        size="small"*/}
-                    {/*        sx={{*/}
-                    {/*          fontSize: '0.75rem',*/}
-                    {/*          borderRadius: '10px',*/}
-                    {/*          textTransform: 'none',*/}
-                    {/*          width: '100%',*/}
-                    {/*          justifyContent: 'flex-start'*/}
-                    {/*        }}*/}
-                    {/*        onClick={(event) => handleSendClick(event, question)}*/}
-                    {/*      >*/}
-                    {/*        {question}*/}
-                    {/*      </Button>*/}
-                    {/*    </Grid>*/}
-                    {/*  ))}*/}
-                    {/*</Grid>*/}
+                    <Grid container spacing={2} sx={{ marginBottom: 2 }}>
+                      {exampleQuestions.map((question, index) => (
+                        <Grid item xs={6} key={index}>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            sx={{
+                              fontSize: '0.75rem',
+                              borderRadius: '10px',
+                              textTransform: 'none',
+                              width: '100%',
+                              justifyContent: 'flex-start'
+                            }}
+                            onClick={(event) => handleSendClick(event, question)}
+                          >
+                            {question}
+                          </Button>
+                        </Grid>
+                      ))}
+                    </Grid>
                     <br/><br/>
                     <ChatIcon color="disabled" sx={{fontSize: 60}}/>
                     <Typography variant="subtitle1" color="textSecondary">
