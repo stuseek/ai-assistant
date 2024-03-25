@@ -9,6 +9,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import {CircularProgress} from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
 
+
 let conversationHistory = [];
 
 function ChatBot() {
@@ -24,6 +25,9 @@ function ChatBot() {
   const [gptVersion, setGptVersion] = useState('gpt-4-turbo-preview');
   const [isFirstCall, setIsFirstCall] = useState(true);
   const [shouldRun, setShouldRun] = useState(false);
+
+  let systemConversationHistory = [];
+
 
 
   const exampleQuestions = [
@@ -100,114 +104,103 @@ function ChatBot() {
   };
 
   const sendMessageToOpenAI = async (isRetry = false, errorMessage = '') => {
-    // if (!question.trim()) return;
+      // if (!question.trim()) return;
 
-    setIsLoading(true);
+      setIsLoading(true);
 
-    const openAIQuestion = `Based on the customer request: "${question}", and message history, what endpoint and fields should we fetch from the Facebook Ads API? Always add name to the top-level fields. Only use real fields from Meta Business API. Respond in JSON with such fields, example: endpoint: endpoint, fields: field1,field2,field3.fields(field1,field2,field3{subfield1,subfield2}). Try to select as much fields as possible to get better results. Do not add anything else, just return stringified json. Should be compatible with provided graphQL syntax. Do not add markdown.`;
+      const openAIQuestion = `Based on the customer request: "${question}", and message history, what endpoint and fields should we fetch from the Facebook Ads API?`;
 
-    let messagesPayload;
-    if (isFirstCall) {
-      messagesPayload = [
-        {
-          "role": "system",
-          "content": "You are a helpful assistant. Analyze the customer request and suggest the endpoint and fields needed for a Facebook Ads API request. Use API Be sure to select fields allowed for endpoint you selected. Be friendly, but not expose a lot of data and explanations."
-        },
-        {
-          "role": "system",
-          "content": "Allowed endpoint values to return: 'campaigns', 'ads', 'adimages', 'adsets', 'customaudiences', 'advideos', 'insights'. Just one word, nothing else."
-        },
-        {
-          "role": "system",
-          "content": "Allowed fields for 'campaigns' endpoint: account_id,adlabels,bid_strategy,boosted_object_id,brand_lift_studies,name,spend_cap,start_time,stop_time,status,id,ads{insights},adsets,insights{cost_per_conversion},budget_remaining,buying_type,lifetime_budget,objective,pacing_type,last_budget_toggling_time"
-        },
-        {
-          "role": "system",
-          "content": "Allowed fields for 'insights' endpoint: account_currency,account_id,account_name,action_values,actions,ad_name,clicks,cpc,cpm,cpp,ctr,date_start,date_stop,dda_results,adset_name,ad_id,adset_id,campaign_name,frequency,impressions,inline_link_click_ctr,inline_link_clicks,inline_post_engagement,objective,video_30_sec_watched_actions,video_avg_time_watched_actions,video_p100_watched_actions,video_p25_watched_actions,video_p50_watched_actions,video_p75_watched_actions,video_p95_watched_actions,video_play_actions,website_purchase_roas,full_view_reach,full_view_impressions,cost_per_action_type,cost_per_conversion,conversion_values,campaign_id,conversions"
-        },
-        {
-          "role": "system",
-          "content": "Allowed fields for 'customaudiences' endpoint: lookalike_audience_ids,name,lookalike_spec,operation_status,ads,data_source,account_id,approximate_count_lower_bound,approximate_count_upper_bound,time_created,sharing_status,sessions,description,id,delivery_status,external_event_source,opt_out_link,adaccounts"
-        },
-        {
-          "role": "system",
-          "content": "Allowed fields for 'adsets' endpoint: account_id,bid_strategy,adlabels,adset_schedule,asset_feed_id,attribution_spec,bid_adjustments,bid_amount,bid_constraints,bid_info,billing_event,budget_remaining,campaign,campaign_active_time,campaign_attribution,campaign_id,name,status,start_time,source_adset,targeting,targeting_optimization_types,ads{insights},insights{cpm},id,daily_budget,created_time,end_time,effective_status,lifetime_budget,lifetime_min_spend_target,lifetime_spend_cap,optimization_goal,pacing_type,adcreatives,copies,configured_status,is_dynamic_creative,recommendations,updated_time,budget_schedules"
-        },
-        {
-          "role": "system",
-          "content": "Allowed fields for 'advideos' endpoint: id,status,video_insights,source,length,live_status,post_views,post_id,published,title,is_crosspost_video,custom_labels,content_category,views"
-        },
-        {
-          "role": "system",
-          "content": "Allowed fields for 'adimages' endpoint: account_id,updated_time,status,id,creatives,created_time,is_associated_creatives_in_adgroups,name,url"
-        },
-        {
-          "role": "user",
-          "content": openAIQuestion
-        }
-      ];
-      setIsFirstCall(false);
-    } else {
-      messagesPayload = [
-        {
-          "role": "user",
-          "content": openAIQuestion
-        }
-      ];
-    }
+      let messagesPayload;
+      // if (isFirstCall) {
+        messagesPayload = [
+          {
+            "role": "system",
+            "content": "" +
+              "You are a helpful assistant. Analyze the customer request and suggest the endpoint and fields needed for a Facebook Ads API request. Always add name to the top-level fields. Respond in JSON with such fields, example: endpoint: endpoint, fields: field1,field2,field3.fields(field1,field2,field3{subfield1,subfield2}), modifiers: modifier1=value&modifier2=value. Try to select as much fields as possible to get better results. Do not add anything else, just return stringified json. Should be compatible with provided graphQL syntax. Do not add markdown. Only use allowed endpoints, modifiers, fields." +
+              "Allowed endpoint values to return: 'campaigns', 'ads', 'adimages', 'adsets', 'customaudiences', 'advideos', 'insights'. " +
+              "Allowed fields for 'campaigns' endpoint: account_id,adlabels,bid_strategy,boosted_object_id,brand_lift_studies,name,spend_cap,start_time,stop_time,status,id,ads{insights},adsets,insights{cost_per_conversion},budget_remaining,buying_type,lifetime_budget,objective,pacing_type,last_budget_toggling_time. " +
+              "Allowed fields for 'insights' endpoint: account_currency,account_id,account_name,action_values,actions,ad_name,clicks,cpc,cpm,cpp,ctr,date_start,date_stop,dda_results,adset_name,ad_id,adset_id,campaign_name,frequency,impressions,inline_link_click_ctr,inline_link_clicks,inline_post_engagement,objective,video_30_sec_watched_actions,video_avg_time_watched_actions,video_p100_watched_actions,video_p25_watched_actions,video_p50_watched_actions,video_p75_watched_actions,video_p95_watched_actions,video_play_actions,full_view_reach,full_view_impressions,cost_per_action_type,cost_per_conversion,conversion_values,campaign_id,conversions. " +
+              "Allowed fields for 'customaudiences' endpoint: lookalike_audience_ids,name,lookalike_spec,operation_status,ads,data_source,account_id,approximate_count_lower_bound,approximate_count_upper_bound,time_created,sharing_status,sessions,description,id,delivery_status,external_event_source,opt_out_link,adaccounts. " +
+              "Allowed fields for 'adsets' endpoint: account_id,bid_strategy,adlabels,adset_schedule,asset_feed_id,attribution_spec,bid_adjustments,bid_amount,bid_constraints,bid_info,billing_event,budget_remaining,campaign,campaign_active_time,campaign_attribution,campaign_id,name,status,start_time,source_adset,targeting,targeting_optimization_types,ads{insights},insights{cpm},id,daily_budget,created_time,end_time,effective_status,lifetime_budget,lifetime_min_spend_target,lifetime_spend_cap,optimization_goal,pacing_type,adcreatives,copies,configured_status,is_dynamic_creative,recommendations,updated_time,budget_schedules. " +
+              "Allowed fields for 'advideos' endpoint: id,status,video_insights,source,length,live_status,post_views,post_id,published,title,is_crosspost_video,custom_labels,content_category,views. " +
+              "Allowed fields for 'adimages' endpoint: account_id,updated_time,status,id,creatives,created_time,is_associated_creatives_in_adgroups,name,url. " +
+              "Allowed fields for 'ads' endpoint: adset,adset_id,adlabels,created_time,creative,name,campaign,campaign_id,account_id,bid_amount,configured_status,conversion_domain,effective_status,adcreatives{body,call_to_action_type,category_media_source,image_url,name,status,video_id,link_destination_display_url,adlabels,product_set_id,title,url_tags,id},updated_time,leads. " +
+              "Allowed modifiers: level=ad,time_range={'since':'YYYY-MM-DD,'until':'YYYY-MM-DD'}. Remember, today is " + Date()
+          },
+          {
+            "role": "user",
+            "content": openAIQuestion
+          }
+        ];
+        setIsFirstCall(false);
+      // } else {
+      //   messagesPayload = [
+      //     {
+      //       "role": "user",
+      //       "content": openAIQuestion
+      //     }
+      //   ];
+      // }
 
-    if (!isRetry) {
-      addMessageToChat({type: 'sent', text: question});
-    }
-
-    messagesPayload.forEach((message) => {
-      conversationHistory.push(message);
-    });
-
-    const data = {
-      model: gptVersion,
-      messages: conversationHistory,
-      response_format: {"type": "json_object"}
-    };
-
-    try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify(data)
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
+      if (!isRetry) {
+        addMessageToChat({type: 'sent', text: question});
       }
 
-      const responseData = await response.json();
-      const botResponseContent = JSON.parse(responseData.choices[0].message.content);
+      messagesPayload.forEach((message) => {
+        systemConversationHistory.push(message);
+      });
+
+      const data = {
+        model: gptVersion,
+        messages: systemConversationHistory,
+        response_format: {"type": "json_object"}
+      };
+
+      try {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+          const responseData = await response.json();
+          if (responseData && responseData.error) {
+            alert(responseData.error.message)
+          }
+          setIsLoading(false);
+          return;
+        }
+
+        const responseData = await response.json();
+        const botResponseContent = JSON.parse(responseData.choices[0].message.content);
 
 
-      conversationHistory.push({role: "assistant", content: JSON.stringify(botResponseContent)});
+        systemConversationHistory.push({role: "assistant", content: JSON.stringify(botResponseContent)});
 
-      const suggestedFields = botResponseContent.fields; // Here you might need to parse the response if it's not in the desired format
-      const endpoint = botResponseContent.endpoint; // Here you might need to parse the response if it's not in the desired format
+        const suggestedFields = botResponseContent.fields; // Here you might need to parse the response if it's not in the desired format
+        const endpoint = botResponseContent.endpoint; // Here you might need to parse the response if it's not in the desired format
+        const modifiers = botResponseContent.modifiers; // Here you might need to parse the response if it's not in the desired format
 
-      console.log("Suggested Fields:", suggestedFields);
+        console.log("Suggested Fields:", suggestedFields);
 
-      setIsLoading(false);
-      return {suggestedFields, endpoint};
-    } catch (error) {
-      setIsLoading(false);
-      console.error('Error communicating with OpenAI:', error);
+        setIsLoading(false);
+        return {suggestedFields, endpoint, modifiers};
+      } catch (error) {
+        setIsLoading(false);
+        console.error('Error communicating with OpenAI:', error);
+      }
     }
-  };
+  ;
 
-  const fetchCampaigns = async (suggestedFields, endpoint) => {
+  const fetchCampaigns = async (suggestedFields, endpoint, modifiers) => {
     const accessToken = authToken;
     const adAccountId = '1785133881702528';
     const baseUrl = `https://graph.facebook.com/v19.0/act_${adAccountId}/${endpoint}`;
-    const url = `${baseUrl}?fields=${suggestedFields}&access_token=${accessToken}`;
+    const url = `${baseUrl}?fields=${suggestedFields}&${modifiers}&access_token=${accessToken}`;
 
     setIsLoading(true);
 
@@ -241,15 +234,15 @@ function ChatBot() {
 
   const run = async (isRetry = false, errorMessage = '') => {
     if (!question.trim()) return;
-    const {suggestedFields, endpoint} = await sendMessageToOpenAI(isRetry);
-    const campaignInfo = await fetchCampaigns(suggestedFields, endpoint);
+    const {suggestedFields, endpoint, modifiers} = await sendMessageToOpenAI(isRetry);
+    const campaignInfo = await fetchCampaigns(suggestedFields, endpoint, modifiers);
     await interpretateResults(campaignInfo);
     setQuestion('');
   };
 
 
   const addSystemMessageToConversation = (message) => {
-    conversationHistory.push({
+    systemConversationHistory.push({
       role: "system",
       content: message
     });
@@ -261,12 +254,12 @@ function ChatBot() {
 
     // Assuming `campaignData` is a string representation of the fetched campaigns
     // Adjust the question to fit your needs for analysis
-    const analysisQuestion = `Based on the following campaign data: "${campaignData}", and considering the user's initial question: "${question}", how can we interpret this information? Don't answer long, but answer structured. Do not mention you have data provided, or lack of data, don't explain a lot. Pretend you know everything. Be very friendly. Try to limit output by 250 tokens, of possible.`;
+    const analysisQuestion = `Based on the following campaign data: "${campaignData}", and considering the user's initial question: "${question}", how can we interpret this information? Don't answer long, but answer structured. Do not mention you have data provided, or lack of data, don't explain a lot. Pretend you know everything. Be very friendly. Try to limit output by 250 tokens, of possible. `;
 
     const messagesPayload = [
       {
         "role": "system",
-        "content": "You are a helpful assistant. Analyze the provided campaign data in the context of the user's initial question and provide insights. Be sure you use Campaign name, not ID. What the param should be shown in dollars other currency please add the symbol. Question could not be related to facebook, but to marketing in general. If there is a link, or url present, format it as a link"
+        "content": "You are a helpful assistant. Analyze the provided campaign data in the context of the user's last question and provide insights. Be sure you use Campaign name, not ID. What the param should be shown in dollars other currency please add the symbol. Question could not be related to facebook, but to marketing in general. If there is a link, or image url present, format it as a link"
       },
       {
         "role": "user",
@@ -299,6 +292,13 @@ function ChatBot() {
 
       const responseData = await response.json();
       const botResponseContent = responseData.choices[0].message.content;
+
+      if (botResponseContent === "additional_call") {
+        console.log('Additional call');
+        addSystemMessageToConversation(`You requested additional call to facebook API.`);
+        await run();
+        return;
+      }
 
       conversationHistory.push({role: "assistant", content: botResponseContent});
 
@@ -403,7 +403,7 @@ function ChatBot() {
                       You can ask me:
                     </Typography>
                     <br/><br/>
-                    <Grid container spacing={2} sx={{ marginBottom: 2 }}>
+                    <Grid container spacing={2} sx={{marginBottom: 2}}>
                       {exampleQuestions.map((question, index) => (
                         <Grid item xs={6} key={index}>
                           <Button
