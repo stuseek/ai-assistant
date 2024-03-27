@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import ReactMarkdown from 'react-markdown';
 import {
   Container, TextField, Button, Box, List, ListItem, ListItemText, Paper,
@@ -16,7 +16,6 @@ let conversationHistory = [];
 function ChatBot() {
   const [apiKey, setApiKey] = useState('');
   const [question, setQuestion] = useState('');
-  const [additionalInfo, setAdditionalInfo] = useState('');
   const [chat, setChat] = useState([]);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [isSettingsOpen, setSettingsOpen] = useState(false);
@@ -27,8 +26,19 @@ function ChatBot() {
   const [isFirstCall, setIsFirstCall] = useState(true);
   const [shouldRun, setShouldRun] = useState(false);
 
-  let systemConversationHistory = [];
 
+  const lastMessageRef = useRef(null);
+
+  useEffect(() => {
+    if (lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  }, [chat]);
+
+  let systemConversationHistory = [];
 
 
   const exampleQuestions = [
@@ -69,8 +79,9 @@ function ChatBot() {
     setQuestion(event.target.value);
   };
 
-  const handleAuthChange = (isLoggedIn) => {
+  const handleAuthChange = (isLoggedIn, token) => {
     setIsAuthenticated(isLoggedIn);
+    setAuthToken(token);
   };
 
   const addMessageToChat = (message) => {
@@ -93,27 +104,27 @@ function ChatBot() {
 
       let messagesPayload;
       // if (isFirstCall) {
-        messagesPayload = [
-          {
-            "role": "system",
-            "content": "" +
-              "You are a helpful assistant. Analyze the customer request and suggest the endpoint and fields needed for a Facebook Ads API request. Always add name to the top-level fields. Respond in JSON with such fields, example: endpoint: endpoint, fields: field1,field2,field3.fields(field1,field2,field3{subfield1,subfield2}), modifiers: modifier1=value&modifier2=value. Try to select as much fields as possible to get better results. Do not add anything else, just return stringified json. Should be compatible with provided graphQL syntax. Do not add markdown. Only use allowed endpoints, modifiers, fields." +
-              "Allowed endpoint values to return: 'campaigns', 'ads', 'adimages', 'adsets', 'customaudiences', 'advideos', 'insights'. " +
-              "Allowed fields for 'campaigns' endpoint: account_id,adlabels,bid_strategy,boosted_object_id,brand_lift_studies,name,spend_cap,start_time,stop_time,status,id,ads{insights},adsets,insights{cost_per_conversion},budget_remaining,buying_type,lifetime_budget,objective,pacing_type,last_budget_toggling_time. " +
-              "Allowed fields for 'insights' endpoint: account_currency,account_id,account_name,action_values,actions,ad_name,clicks,cpc,cpm,cpp,ctr,date_start,date_stop,dda_results,adset_name,ad_id,adset_id,campaign_name,frequency,impressions,inline_link_click_ctr,inline_link_clicks,inline_post_engagement,objective,video_30_sec_watched_actions,video_avg_time_watched_actions,video_p100_watched_actions,video_p25_watched_actions,video_p50_watched_actions,video_p75_watched_actions,video_p95_watched_actions,video_play_actions,full_view_reach,full_view_impressions,cost_per_action_type,cost_per_conversion,conversion_values,campaign_id,conversions. " +
-              "Allowed fields for 'customaudiences' endpoint: lookalike_audience_ids,name,lookalike_spec,operation_status,ads,data_source,account_id,approximate_count_lower_bound,approximate_count_upper_bound,time_created,sharing_status,sessions,description,id,delivery_status,external_event_source,opt_out_link,adaccounts. " +
-              "Allowed fields for 'adsets' endpoint: account_id,bid_strategy,adlabels,adset_schedule,asset_feed_id,attribution_spec,bid_adjustments,bid_amount,bid_constraints,bid_info,billing_event,budget_remaining,campaign,campaign_active_time,campaign_attribution,campaign_id,name,status,start_time,source_adset,targeting,targeting_optimization_types,ads{insights},insights{cpm},id,daily_budget,created_time,end_time,effective_status,lifetime_budget,lifetime_min_spend_target,lifetime_spend_cap,optimization_goal,pacing_type,adcreatives,copies,configured_status,is_dynamic_creative,recommendations,updated_time,budget_schedules. " +
-              "Allowed fields for 'advideos' endpoint: id,status,video_insights,source,length,live_status,post_views,post_id,published,title,is_crosspost_video,custom_labels,content_category,views. " +
-              "Allowed fields for 'adimages' endpoint: account_id,updated_time,status,id,creatives,created_time,is_associated_creatives_in_adgroups,name,url. " +
-              "Allowed fields for 'ads' endpoint: adset,adset_id,adlabels,created_time,creative,name,campaign,campaign_id,account_id,bid_amount,configured_status,conversion_domain,effective_status,adcreatives{body,call_to_action_type,category_media_source,image_url,name,status,video_id,link_destination_display_url,adlabels,product_set_id,title,url_tags,id},updated_time,leads. " +
-              "Allowed modifiers: level=ad,time_range={'since':'YYYY-MM-DD,'until':'YYYY-MM-DD'}. Remember, today is " + Date()
-          },
-          {
-            "role": "user",
-            "content": openAIQuestion
-          }
-        ];
-        setIsFirstCall(false);
+      messagesPayload = [
+        {
+          "role": "system",
+          "content": "" +
+            "You are a helpful assistant. Analyze the customer request and suggest the endpoint and fields needed for a Facebook Ads API request. Always add name to the top-level fields. Respond in JSON with such fields, example: endpoint: endpoint, fields: field1,field2,field3.fields(field1,field2,field3{subfield1,subfield2}), modifiers: modifier1=value&modifier2=value. Try to select as much fields as possible to get better results. Do not add anything else, just return stringified json. Should be compatible with provided graphQL syntax. Do not add markdown. Only use allowed endpoints, modifiers, fields." +
+            "Allowed endpoint values to return: 'campaigns', 'ads', 'adimages', 'adsets', 'customaudiences', 'advideos', 'insights'. " +
+            "Allowed fields for 'campaigns' endpoint: account_id,adlabels,bid_strategy,boosted_object_id,brand_lift_studies,name,spend_cap,start_time,stop_time,status,id,ads{insights},adsets,insights{cost_per_conversion},budget_remaining,buying_type,lifetime_budget,objective,pacing_type,last_budget_toggling_time. " +
+            "Allowed fields for 'insights' endpoint: account_currency,account_id,account_name,action_values,actions,ad_name,clicks,cpc,cpm,cpp,ctr,date_start,date_stop,dda_results,adset_name,ad_id,adset_id,campaign_name,frequency,impressions,inline_link_click_ctr,inline_link_clicks,inline_post_engagement,objective,video_30_sec_watched_actions,video_avg_time_watched_actions,video_p100_watched_actions,video_p25_watched_actions,video_p50_watched_actions,video_p75_watched_actions,video_p95_watched_actions,video_play_actions,full_view_reach,full_view_impressions,cost_per_action_type,cost_per_conversion,conversion_values,campaign_id,conversions. " +
+            "Allowed fields for 'customaudiences' endpoint: lookalike_audience_ids,name,lookalike_spec,operation_status,ads,data_source,account_id,approximate_count_lower_bound,approximate_count_upper_bound,time_created,sharing_status,sessions,description,id,delivery_status,external_event_source,opt_out_link,adaccounts. " +
+            "Allowed fields for 'adsets' endpoint: account_id,bid_strategy,adlabels,adset_schedule,asset_feed_id,attribution_spec,bid_adjustments,bid_amount,bid_constraints,bid_info,billing_event,budget_remaining,campaign,campaign_active_time,campaign_attribution,campaign_id,name,status,start_time,source_adset,targeting,targeting_optimization_types,ads{insights},insights{cpm},id,daily_budget,created_time,end_time,effective_status,lifetime_budget,lifetime_min_spend_target,lifetime_spend_cap,optimization_goal,pacing_type,adcreatives,copies,configured_status,is_dynamic_creative,recommendations,updated_time,budget_schedules. " +
+            "Allowed fields for 'advideos' endpoint: id,status,video_insights,source,length,live_status,post_views,post_id,published,title,is_crosspost_video,custom_labels,content_category,views. " +
+            "Allowed fields for 'adimages' endpoint: account_id,updated_time,status,id,creatives,created_time,is_associated_creatives_in_adgroups,name,url. " +
+            "Allowed fields for 'ads' endpoint: adset,adset_id,adlabels,created_time,creative,name,campaign,campaign_id,account_id,bid_amount,configured_status,conversion_domain,effective_status,adcreatives{body,call_to_action_type,category_media_source,image_url,name,status,video_id,link_destination_display_url,adlabels,product_set_id,title,url_tags,id},updated_time,leads. " +
+            "Allowed modifiers: level=ad,time_range={'since':'YYYY-MM-DD,'until':'YYYY-MM-DD'}. Remember, today is " + Date()
+        },
+        {
+          "role": "user",
+          "content": openAIQuestion
+        }
+      ];
+      setIsFirstCall(false);
       // } else {
       //   messagesPayload = [
       //     {
@@ -358,19 +369,46 @@ function ChatBot() {
                   <List>
                     {chat.map((chatMessage, index) => (
                       <React.Fragment key={index}>
-                        <ListItem alignItems="flex-start">
+                        <ListItem style={{flexDirection: "column"}}
+                                  alignItems="flex-start" ref={index === chat.length - 1 ? lastMessageRef : null}>
                           <ListItemText
-                            primary={chatMessage.type === 'sent' ? 'You' : 'Assistant'}
-                            secondary={<ReactMarkdown>{chatMessage.text}</ReactMarkdown>}
-                            primaryTypographyProps={{
-                              color: chatMessage.type === 'sent' ? 'primary' : 'textSecondary',
-                              fontWeight: 'fontWeightBold',
+                            style={{flexDirection: "column"}}
+                            primary={
+                              <Typography
+                                type="body2"
+                                style={{
+                                  color: chatMessage.type === 'sent' ? 'white' : 'black',
+                                  textAlign: chatMessage.type === 'sent' ? 'right' : 'left'
+                                }}>
+                              </Typography>}
+                            secondary={
+                              <Box style={{
+                                color: chatMessage.type === 'sent' ? 'white' : 'black',
+                                textAlign: chatMessage.type === 'sent' ? 'right' : 'left',
+                                alignSelf: chatMessage.type === 'sent' ? 'flex-end' : 'flex-start'
+                              }}>
+                                <ReactMarkdown>{chatMessage.text}</ReactMarkdown>
+                              </Box>
+                            }
+                            sx={{
+                              border: 1,
+                              borderColor: 'grey.300',
+                              borderRadius: '10px',
+                              bgcolor: chatMessage.type === 'sent' ? 'primary.light' : 'grey.100',
+                              py: 1,
+                              px: 2,
+                              maxWidth: '75%',
+                              alignSelf: chatMessage.type === 'sent' ? 'flex-end' : 'flex-start',
                             }}
                           />
                         </ListItem>
-                        {index < chat.length - 1 && <ListItem divider/>}
                       </React.Fragment>
                     ))}
+                    {isLoading && (
+                      <ListItem>
+                        <ListItemText primary="Assistant is typing..."/>
+                      </ListItem>
+                    )}
                   </List>
                 ) : (
                   <Box sx={{

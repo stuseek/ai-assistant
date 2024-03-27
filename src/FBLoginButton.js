@@ -33,7 +33,7 @@ function FacebookLoginButton({ configId, onAuthChange }) {
     window.FB.getLoginStatus(function (response) {
       if (response.status === 'connected') {
         // User is authenticated
-        onAuthChange(true); // Notify the parent component
+        onAuthChange(true, response.authResponse.accessToken); // Notify the parent component
       } else {
         // User is not authenticated
         onAuthChange(false); // Notify the parent component
