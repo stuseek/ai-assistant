@@ -8,6 +8,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import SettingsIcon from '@mui/icons-material/Settings';
 import {CircularProgress} from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
+import FacebookLoginButton from "./FBLoginButton";
 
 
 let conversationHistory = [];
@@ -37,12 +38,6 @@ function ChatBot() {
     "What audience is driving the most purchases?"
   ];
 
-  const checkLoginStatus = () => {
-    window.FB.getLoginStatus(function (response) {
-      console.log(response)
-    });
-  }
-
   useEffect(() => {
     const executeRun = async () => {
       if (shouldRun && question) {
@@ -53,24 +48,6 @@ function ChatBot() {
 
     executeRun();
   }, [shouldRun, question]); // Depend on `shouldRun` and `question`
-
-
-  useEffect(() => {
-    window.FB.getLoginStatus(function (response) {
-      if (response.status === 'connected') {
-        setIsAuthenticated(true);
-        setAuthToken(response.authResponse.accessToken);
-        console.log('User is authorized')
-      } else if (response.status === 'not_authorized') {
-        setIsAuthenticated(false);
-        console.log('User is not authorized')
-      } else {
-        setIsAuthenticated(false);
-        console.log('User auth status is unknown')
-
-      }
-    });
-  }, []);
 
   const toggleDrawer = () => {
     setDrawerOpen(!isDrawerOpen);
@@ -259,7 +236,7 @@ function ChatBot() {
     const messagesPayload = [
       {
         "role": "system",
-        "content": "You are a helpful assistant. Analyze the provided campaign data in the context of the user's last question and provide insights. Be sure you use Campaign name, not ID. What the param should be shown in dollars other currency please add the symbol. Question could not be related to facebook, but to marketing in general. If there is a link, or image url present, format it as a link"
+        "content": "You are a helpful assistant. Analyze the provided campaign data in the context of the user's last question and provide insights. Be sure you use Campaign name, not ID. What the param should be shown in dollars other currency please add the symbol. Question could not be related to facebook, but to marketing in general. If there is a link, or image url present, format it as a link or image please."
       },
       {
         "role": "user",
@@ -325,7 +302,7 @@ function ChatBot() {
       <Box sx={{my: 4}}>
         {!isAuthenticated ? (
           <>
-            <button onClick={checkLoginStatus}>Check Login Status</button>
+            <FacebookLoginButton configId='1121020542257714'/>
           </>
         ) : (
           <>
