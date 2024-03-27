@@ -25,6 +25,7 @@ function ChatBot() {
   const [gptVersion, setGptVersion] = useState('gpt-4-turbo-preview');
   const [isFirstCall, setIsFirstCall] = useState(true);
   const [shouldRun, setShouldRun] = useState(false);
+  const [loadingText, setLoadingText] = useState('Analyzing');
 
 
   const lastMessageRef = useRef(null);
@@ -44,7 +45,7 @@ function ChatBot() {
   const exampleQuestions = [
     "How many impressions in the last month?",
     "How many campaigns are currently active?",
-    "Which ad drove the most purchases?",
+    "Which ad was clicked the most?", ,
     "What audience is driving the most purchases?"
   ];
 
@@ -99,6 +100,7 @@ function ChatBot() {
       // if (!question.trim()) return;
 
       setIsLoading(true);
+      setLoadingText("Analyzing Customer Request");
 
       const openAIQuestion = `Based on the customer request: "${question}", and message history, what endpoint and fields should we fetch from the Facebook Ads API?`;
 
@@ -195,6 +197,8 @@ function ChatBot() {
     const url = `${baseUrl}?fields=${suggestedFields}&${modifiers}&access_token=${accessToken}`;
 
     setIsLoading(true);
+    setLoadingText("Getting Marketing Data");
+
 
     try {
       const response = await fetch(url);
@@ -244,6 +248,7 @@ function ChatBot() {
     if (!campaignData.trim()) return;
 
     setIsLoading(true);
+    setLoadingText("Analyzing Marketing Data");
 
     // Assuming `campaignData` is a string representation of the fetched campaigns
     // Adjust the question to fit your needs for analysis
@@ -377,8 +382,7 @@ function ChatBot() {
                               <Typography
                                 type="body2"
                                 style={{
-                                  color: chatMessage.type === 'sent' ? 'white' : 'black',
-                                  textAlign: chatMessage.type === 'sent' ? 'right' : 'left'
+                                  color: chatMessage.type === 'sent' ? 'white' : 'black'
                                 }}>
                               </Typography>}
                             secondary={
@@ -406,7 +410,9 @@ function ChatBot() {
                     ))}
                     {isLoading && (
                       <ListItem>
-                        <ListItemText primary="Assistant is typing..."/>
+                        <CircularProgress size={15}/>
+                        &nbsp;&nbsp;
+                        <ListItemText primary={loadingText}/>
                       </ListItem>
                     )}
                   </List>
@@ -458,6 +464,7 @@ function ChatBot() {
                   fullWidth
                   value={question}
                   onChange={handleQuestionChange}
+                  disabled={isLoading}
                   margin="normal"
                   onKeyPress={(ev) => {
                     if (ev.key === 'Enter') {
@@ -469,7 +476,7 @@ function ChatBot() {
                 <Button variant="contained" color="primary" onClick={handleSendClick}
                         disabled={isLoading}
                         sx={{py: '15px', minWidth: '100px'}}>
-                  {isLoading ? <CircularProgress size={24}/> : 'Send'}
+                  {'Send'}
                 </Button>
               </Box>
             </Box>
