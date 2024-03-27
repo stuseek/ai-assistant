@@ -69,6 +69,10 @@ function ChatBot() {
     setQuestion(event.target.value);
   };
 
+  const handleAuthChange = (isLoggedIn) => {
+    setIsAuthenticated(isLoggedIn);
+  };
+
   const addMessageToChat = (message) => {
     setChat((prevChat) => [
       ...prevChat,
@@ -224,6 +228,7 @@ function ChatBot() {
       content: message
     });
   };
+
   const interpretateResults = async (campaignData = '') => {
     if (!campaignData.trim()) return;
 
@@ -302,7 +307,7 @@ function ChatBot() {
       <Box sx={{my: 4}}>
         {!isAuthenticated ? (
           <>
-            <FacebookLoginButton configId='1121020542257714'/>
+            <FacebookLoginButton configId='1121020542257714' onAuthChange={handleAuthChange}/>
           </>
         ) : (
           <>

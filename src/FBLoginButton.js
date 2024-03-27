@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-function FacebookLoginButton({ configId }) {
+function FacebookLoginButton({ configId, onAuthChange }) {
   useEffect(() => {
     // Ensure FB SDK is loaded
     if (!window.FB) {
@@ -12,6 +12,7 @@ function FacebookLoginButton({ configId }) {
           version: 'v19.0'
         });
 
+        checkLoginState();
         window.FB.XFBML.parse();
       };
 
@@ -27,6 +28,18 @@ function FacebookLoginButton({ configId }) {
       window.FB.XFBML.parse();
     }
   }, []);
+
+  const checkLoginState = () => {
+    window.FB.getLoginStatus(function (response) {
+      if (response.status === 'connected') {
+        // User is authenticated
+        onAuthChange(true); // Notify the parent component
+      } else {
+        // User is not authenticated
+        onAuthChange(false); // Notify the parent component
+      }
+    });
+  }
 
   return (
     <div id="fb-root">
